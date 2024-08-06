@@ -1,5 +1,4 @@
 
-
 #!/bin/bash
 
 # Get the subject ID, subject directory, and simulation directory from the command-line arguments
@@ -17,6 +16,18 @@ OUTPUT_DIR="$simulation_dir/sim_${subject_id}/niftis"
 # Create output directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
 
+# Check if MESH_DIR exists and is a directory
+if [ ! -d "$MESH_DIR" ]; then
+  echo "Error: Directory $MESH_DIR does not exist."
+  exit 1
+fi
+
+# Check if FN_REFERENCE exists and is a directory
+if [ ! -d "$FN_REFERENCE" ]; then
+  echo "Error: Reference directory $FN_REFERENCE does not exist."
+  exit 1
+fi
+
 # Loop through all .msh files in the directory
 for FN_MESH in "$MESH_DIR"/*.msh; do
   # Check if any .msh files are found
@@ -33,8 +44,11 @@ for FN_MESH in "$MESH_DIR"/*.msh; do
   
   # Run the msh2nii command or subject2mni
   subject2mni -i "$FN_MESH" -m "$FN_REFERENCE" -o "$FN_OUT"
+  if [ $? -ne 0 ]; then
+    echo "Error: subject2mni command failed for $FN_MESH."
+    exit 1
+  fi
   #msh2nii  "$FN_MESH" "$FN_REFERENCE" "$FN_OUT"
- 
 done
 
 echo "Processing complete!"

@@ -1,6 +1,4 @@
 .
-├── README.md
-├── TI-pipeline.py
 ├── TI.py
 ├── base-niftis
 │   ├── MNI152_T1_1mm.nii.gz
@@ -8,8 +6,6 @@
 │   ├── combined_spheres.nii.gz
 │   └── neuro-ego.nii.gz
 ├── dir_sturct.txt
-├── directory_structure.txt
-├── directory_sturct.txt
 ├── environment.yml
 ├── field-analysis
 │   ├── SIMNIBSDIR.m
@@ -61,10 +57,9 @@
 │   ├── subject_atlas.m
 │   └── unresolvedSymbols.txt
 ├── gm_extract.py
-├── mTI-pipeline.py
 ├── mTI.py
-├── main-pipeline.py
-├── main.sh
+├── main-TI.sh
+├── main-mTI.sh
 ├── mesh2nii_loop.sh
 ├── montage_list.json
 ├── montage_list.txt
@@ -72,4 +67,4 @@
 ├── sphere-analysis.sh
 └── starter.sh
 
-4 directories, 69 files
+4 directories, 64 files

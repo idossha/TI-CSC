@@ -53,7 +53,8 @@ tdcs_lf.tissues =tissue_list
 """
 You can uncomment to use the pardiso solver which is faster.
 This solver is faster than the default. However, it requires much more memory (~12 GB)
-However, do not use this for hd-EEG caps
+
+Does not work well on Apple Sillicon chips.
 """
 
 # tdcs_lf.solver_options = "pardiso"

@@ -23,6 +23,7 @@ locations=(
   "95 73 127"
   "95 56 116"
   "95 79 89"
+  "101 101 81"
 )
 
 # Location names
@@ -30,6 +31,7 @@ location_names=(
   "Anterior"
   "Posterior"
   "RSC"
+  "thalamus"
 )
 
 # Radius for the spherical region (in voxels)

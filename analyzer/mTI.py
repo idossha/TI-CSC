@@ -1,32 +1,31 @@
 
 import os
-import time
+import sys
+import json
 from copy import deepcopy
 import numpy as np
 from simnibs import mesh_io, run_simnibs, sim_struct
 from simnibs.utils import TI_utils as TI
 
+# Get subject ID, simulation type, and montages from command-line arguments
+subject_id = sys.argv[1]
+sim_type = sys.argv[2]  # The anisotropy type
+subject_dir = sys.argv[3]
+simulation_dir = sys.argv[4]
+montage_names = sys.argv[5:]  # The list of montages
 
-# Multipolar - Make sure you run at half the Unipolar intensity.
-montages = {
-    "RSC_1": [("E066", "E079"), ("E164", "E143")],
-    "RSC_2": [("E098", "E100"), ("E129", "E152")],
-    "thala_1": [("E111", "E122"), ("E133", "E144")],
-    "thala_2": [("E145", "E156"), ("E167", "E178")]
-}
+# Load montages from JSON file
+with open('montage_list.json') as f:
+    all_montages = json.load(f)
 
-
-# List of montage pairs for mTI calculations
-montage_pairs = [
-    ("RSC_1", "RSC_2"),
-    ("thala_1", "thala_2")
-]
+# Create the montages dictionary based on the selected montages
+montages = {name: all_montages['uni_polar_montages'].get(name, all_montages['multi_polar_montages'].get(name))
+            for name in montage_names}
 
 # Base paths
-base_subpath = "m2m_101"
-main_dir = os.path.abspath(os.path.join(base_subpath, os.pardir))
-base_pathfem = os.path.join(main_dir, "Multipolar_Simulations")
-conductivity_path = "m2m_101"
+base_subpath = os.path.join(subject_dir, f"m2m_{subject_id}")
+base_pathfem = os.path.join(simulation_dir, f"sim_{subject_id}", "FEM")
+conductivity_path = base_subpath
 tensor_file = os.path.join(conductivity_path, "DTI_coregT1_tensor.nii.gz")
 
 # Ensure the base_pathfem directory exists
@@ -37,9 +36,9 @@ if not os.path.exists(base_pathfem):
 def run_simulation(montage_name, montage):
     S = sim_struct.SESSION()
     S.subpath = base_subpath
-    S.anisotropy_type = "dir"
+    S.anisotropy_type = sim_type
     S.pathfem = os.path.join(base_pathfem, f"TI_{montage_name}")
-    S.eeg_cap = "m2m_101/eeg_positions/EGI_template.csv"
+    S.eeg_cap = os.path.join(base_subpath, "eeg_positions", "EGI_template.csv")
     S.map_to_surf = False
     S.map_to_fsavg = False
     S.map_to_vol = False
@@ -52,8 +51,8 @@ def run_simulation(montage_name, montage):
 
     # First electrode pair
     tdcs = S.add_tdcslist()
-    tdcs.anisotropy_type = 'dir'  # Set anisotropy_type to 'dir'
-    tdcs.currents = [0.005, -0.005]
+    tdcs.anisotropy_type = sim_type  # Set anisotropy_type to the input sim_type
+    tdcs.currents = [0.0025, -0.0025]
     electrode = tdcs.add_electrode()
     electrode.channelnr = 1
     electrode.centre = montage[0][0]
@@ -70,17 +69,17 @@ def run_simulation(montage_name, montage):
 
     # Second electrode pair
     tdcs_2 = S.add_tdcslist(deepcopy(tdcs))
-    tdcs_2.currents = [0.005, -0.005]
+    tdcs_2.currents = [0.0025, -0.0025]
     tdcs_2.electrode[0].centre = montage[1][0]
     tdcs_2.electrode[1].centre = montage[1][1]
 
     run_simnibs(S)
 
-    last_three_digits = base_subpath[-3:]
+    subject_identifier = base_subpath.split('_')[-1]
     anisotropy_type = S.anisotropy_type
 
-    m1_file = os.path.join(S.pathfem, f"{last_three_digits}_TDCS_1_{anisotropy_type}.msh")
-    m2_file = os.path.join(S.pathfem, f"{last_three_digits}_TDCS_2_{anisotropy_type}.msh")
+    m1_file = os.path.join(S.pathfem, f"{subject_identifier}_TDCS_1_{anisotropy_type}.msh")
+    m2_file = os.path.join(S.pathfem, f"{subject_identifier}_TDCS_2_{anisotropy_type}.msh")
 
     m1 = mesh_io.read_msh(m1_file)
     m2 = mesh_io.read_msh(m2_file)
@@ -107,10 +106,8 @@ def run_simulation(montage_name, montage):
 # Run the simulations and collect the output paths
 output_paths = {name: run_simulation(name, montage) for name, montage in montages.items()}
 
-
-#################################################
-######### THIS IS mTI calculation ###############
-#################################################
+# Create pairs of montage names for mTI calculations
+montage_pairs = [(montage_names[i], montage_names[i+1]) for i in range(0, len(montage_names) - 1, 2)]
 
 # Iterate through the montage pairs for mTI calculation
 for pair in montage_pairs:
@@ -141,3 +138,4 @@ for pair in montage_pairs:
         mesh_io.write_msh(mout, output_mesh_path)
     else:
         print(f"Montage names {m1_name} and {m2_name} are not in the output paths.")
+

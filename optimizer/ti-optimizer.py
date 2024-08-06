@@ -53,7 +53,7 @@ intensity = get_intensity("Intensity of stimulation in mV: ")
 all_combinations = generate_combinations(E1_plus, E1_minus, E2_plus, E2_minus)
 
 # Load lead field
-leadfield_hdf = "leadfield_element/101_leadfield_EGI_template_reduced.hdf5"
+leadfield_hdf = "leadfield_beril/beril_leadfield_EGI_template.hdf5"
 leadfield, mesh, idx_lf = TI.load_leadfield(leadfield_hdf)
 
 # Create output directory if it doesn't exist
