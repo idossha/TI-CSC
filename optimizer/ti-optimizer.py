@@ -53,11 +53,15 @@ intensity = get_intensity("Intensity of stimulation in mV: ")
 all_combinations = generate_combinations(E1_plus, E1_minus, E2_plus, E2_minus)
 
 # Load lead field
-leadfield_hdf = "leadfield_beril/beril_leadfield_EGI_template.hdf5"
+leadfield_hdf = os.getenv('LEADFIELD_HDF')
 leadfield, mesh, idx_lf = TI.load_leadfield(leadfield_hdf)
 
+# Set the output directory based on the project directory and subject name
+project_dir = os.getenv('PROJECT_DIR')
+subject_name = os.getenv('SUBJECT_NAME')
+output_dir = os.path.join(project_dir, f"Simulations/opt_{subject_name}")
+
 # Create output directory if it doesn't exist
-output_dir = "opt"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 

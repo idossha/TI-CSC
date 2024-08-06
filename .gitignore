@@ -1,1 +1,7 @@
 optimizer/leadfield_beril/
+
+#: Ignore OS generated files
+.DS_Store
+analyzer/.DS_Store
+optimizer/.DS_Store
+

@@ -9,9 +9,13 @@ import json
 import csv
 import shutil
 
-# Directory paths
-roi_directory = 'ROIs'
-opt_directory = 'opt'
+# Get the project directory and subject name from environment variables
+project_dir = os.getenv('PROJECT_DIR')
+subject_name = os.getenv('SUBJECT_NAME')
+
+# Set the directories based on project directory and subject name
+roi_directory = os.path.join(project_dir, 'ROIs')
+opt_directory = os.path.join(project_dir, f'Simulations/opt_{subject_name}')
 
 # Read the list of ROI files from roi_list.txt
 with open('roi_list.txt', 'r') as file:
@@ -31,19 +35,20 @@ for msh_file in os.listdir(opt_directory):
         for pos_file in position_files:
             pos_base = os.path.splitext(os.path.basename(pos_file))[0]  # Extract the base name of the position file without extension
             print(f"  Using position file {pos_file}")
-            # Run the command to generate CSV files in the opt directory
+            # Run the command to generate CSV files in the pwd/ROIs directory
             try:
-                subprocess.run(["get_fields_at_coordinates", "-s", pos_file, "-m", msh_file_path], check=True)
+                print(f"Running command: get_fields_at_coordinates -s {pos_file} -m {msh_file_path} --method linear")
+                subprocess.run(["get_fields_at_coordinates", "-s", pos_file, "-m", msh_file_path, "--method", "linear"], check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error running get_fields_at_coordinates: {e}")
                 continue
             
-            # Move the generated CSV file to the opt directory
-            generated_csv_file = os.path.join(roi_directory, f"{pos_base}_TImax.csv")
-            target_csv_file = os.path.join(opt_directory, f"{pos_base}_TImax.csv")
+            # The generated CSV file will be in the pwd/ROIs directory
+            generated_csv_file = os.path.join('ROIs', f"{pos_base}_TImax.csv")
             
+            print(f"Checking if generated CSV file exists: {generated_csv_file}")
             if os.path.exists(generated_csv_file):
-                shutil.move(generated_csv_file, target_csv_file)
+                print(f"Found generated CSV file: {generated_csv_file}")
             else:
                 print(f"    CSV file {generated_csv_file} not found. Skipping this file.")
                 continue
@@ -56,10 +61,11 @@ for msh_file in os.listdir(opt_directory):
                 mesh_key = msh_file_path
                 
                 # Check if the file exists before reading
-                if os.path.exists(target_csv_file):
+                print(f"Checking if target CSV file exists: {generated_csv_file}")
+                if os.path.exists(generated_csv_file):
                     try:
                         # Read the CSV file into a dataframe without headers
-                        df3 = pd.read_csv(target_csv_file, header=None)
+                        df3 = pd.read_csv(generated_csv_file, header=None)
                         
                         # Ensure all data can be converted to float
                         df3 = df3.apply(pd.to_numeric, errors='coerce')
@@ -75,11 +81,11 @@ for msh_file in os.listdir(opt_directory):
                         mesh_data[mesh_key][pos_base] = ti_values
                         
                         # Delete the CSV file
-                        os.remove(target_csv_file)
+                        os.remove(generated_csv_file)
                     except Exception as e:
-                        print(f"Error processing file {target_csv_file}: {e}")
+                        print(f"Error processing file {generated_csv_file}: {e}")
                 else:
-                    print(f"    CSV file {target_csv_file} not found. Skipping this file.")
+                    print(f"    CSV file {generated_csv_file} not found. Skipping this file.")
             else:
                 print(f"    Could not extract required parts from {msh_file_path} using {pos_file}. Skipping this file.")
 

@@ -1,7 +1,14 @@
 
+# Get the project directory and subject name from environment variables
+project_dir=$PROJECT_DIR
+subject_name=$SUBJECT_NAME
+
+# Define the opt directory
+opt_directory="$project_dir/Simulations/opt_$subject_name"
+
 # List all .msh files with numbers next to them
 echo "Here are the .msh files in the opt directory:"
-msh_files=($(ls opt/*.msh))
+msh_files=($(ls "$opt_directory"/*.msh))
 for i in "${!msh_files[@]}"; do
     echo "$i: ${msh_files[$i]}"
 done
@@ -37,7 +44,7 @@ case "$delete_choice" in
             fi
         done
         # Delete all .opt files
-        rm -f opt/*.opt
+        rm -f "$opt_directory"/*.opt
         echo "Remaining .msh files and all .opt files deleted."
         ;;
       n|N ) 

@@ -1,9 +1,11 @@
 
 #!/bin/bash
 
-# Create the ROI and opt directories if they don't exist
-mkdir -p ROIs
-mkdir -p opt
+# Prompt the user for the project directory and subject name
+read -p "Enter project directory (the default is /Users/idohaber/Desktop/strengthen): " project_dir
+project_dir=${project_dir:-/Users/idohaber/Desktop/strengthen}
+
+read -p "Enter subject name (e.g., 'beril'): " subject_name
 
 # Call the ROI creator script
 echo "Running roi-creator.py..."
@@ -16,6 +18,12 @@ else
     echo "ROI creation failed. Exiting."
     exit 1
 fi
+
+# Set the leadfield_hdf path
+leadfield_hdf="$project_dir/Subjects/leadfield_$subject_name/${subject_name}_leadfield_EGI_template.hdf5"
+export LEADFIELD_HDF=$leadfield_hdf
+export PROJECT_DIR=$project_dir
+export SUBJECT_NAME=$subject_name
 
 # Call the TI optimizer script
 echo "Running ti-optimizer.py..."
@@ -41,11 +49,21 @@ else
     exit 1
 fi
 
-# Open the output.csv file
-echo "Opening output.csv file..."
-open opt/output.csv
+# Set the correct path for the output.csv file
+output_csv="$project_dir/Simulations/opt_$subject_name/output.csv"
+echo "Opening $output_csv..."
+open "$output_csv"
+
+# List .msh files in the opt directory
+msh_files=$(ls "$project_dir/Simulations/opt_$subject_name"/*.msh 2> /dev/null)
+if [ -z "$msh_files" ]; then
+    echo "No .msh files found in the opt directory."
+else
+    echo "Here are the .msh files in the opt directory:"
+    echo "$msh_files"
+fi
 
 bash mesh-selector.sh
 
-
 echo "All tasks completed successfully."
+
