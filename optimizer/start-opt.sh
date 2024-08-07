@@ -7,6 +7,9 @@ project_dir=${project_dir:-/Users/idohaber/Desktop/strengthen}
 
 read -p "Enter subject name (e.g., 'beril'): " subject_name
 
+# Get the current script directory
+script_dir=$(pwd)
+
 # Call the ROI creator script
 echo "Running roi-creator.py..."
 python3 roi-creator.py
@@ -49,20 +52,39 @@ else
     exit 1
 fi
 
+# Define the mesh directory
+mesh_dir="$project_dir/Simulations/opt_$subject_name"
+
+# Run the process_mesh_files_new.sh script
+echo "Running process_mesh_files_new.sh..."
+./field-analysis/process_mesh_files_new.sh "$mesh_dir"
+
+# Check if the mesh processing was successful
+if [ $? -eq 0 ]; then
+    echo "Mesh processing completed successfully."
+else
+    echo "Mesh processing failed. Exiting."
+    exit 1
+fi
+
+# Run the Python script to update the output.csv file
+echo "Running update_output_csv.py..."
+python3 update_output_csv.py "$project_dir" "$subject_name"
+
+# Check if the Python script was successful
+if [ $? -eq 0 ]; then
+    echo "Updated output.csv successfully."
+else
+    echo "Failed to update output.csv. Exiting."
+    exit 1
+fi
+
 # Set the correct path for the output.csv file
-output_csv="$project_dir/Simulations/opt_$subject_name/output.csv"
+output_csv="$mesh_dir/output.csv"
 echo "Opening $output_csv..."
 open "$output_csv"
 
-# List .msh files in the opt directory
-msh_files=$(ls "$project_dir/Simulations/opt_$subject_name"/*.msh 2> /dev/null)
-if [ -z "$msh_files" ]; then
-    echo "No .msh files found in the opt directory."
-else
-    echo "Here are the .msh files in the opt directory:"
-    echo "$msh_files"
-fi
-
+# Run the mesh selector script
 bash mesh-selector.sh
 
 echo "All tasks completed successfully."

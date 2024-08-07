@@ -10,5 +10,5 @@ function main(varargin)
     mesh_dir = p.Results.mesh_dir;
 
     % Call the function to process mesh files
-    process_mesh_files(mesh_dir);
+    process_mesh_files_new(mesh_dir);
 end
