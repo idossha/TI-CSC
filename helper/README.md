@@ -36,32 +36,33 @@ conda env export > environment.yml  : export packages of active env to a yml fil
 
 ---
 
-# Anlyzer
+# Analyzer
 
 Required:
 
-1. subject directories
+1. Project directory containing `Subjects` subdirectory with `m2m_SubjectName` subdirs.
 2. EGI cap named `EEG_template.csv` (can use bs2sn.py for conversion)
 3. tensor file (only for anisotropic simulation)
 
 How to run:
 
-`bash starter.sh` and follow the prompts.
+`bash start-ana.sh` and follow the prompts.
 
+If you run multiple conscutive analyses, it is recommended to move the previous `sim_SubjectName` elsewhere.
 
-
-only thing missing:
-
-if user chose U -> good
-if user choose M -> use mTI intead of TI.
 
 ---
 
 # Optimizer
 
-run optimizer, and take notes. finish it tomoroow and upload to git repo and move on.
+Required:
 
+1. Project directory containing `Subjects` subdirectory with `m2m_SubjectName` subdirs.
+2. `leadfield_SubjectName` directory in `Subjects`
 
+How to run:
+
+`bash start-opt.sh` and follow the prompts.
 
 ---
 
