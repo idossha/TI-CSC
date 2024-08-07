@@ -29,7 +29,10 @@ for msh_file in os.listdir(opt_directory):
     if msh_file.endswith('.msh'):
         msh_file_path = os.path.join(opt_directory, msh_file)
         print(f"Processing {msh_file_path}")
-        mesh_data[msh_file_path] = {}
+        
+        # Use only the file name part for mesh_key
+        mesh_key = os.path.basename(msh_file_path)
+        mesh_data[mesh_key] = {}
 
         # Iterate over all position files
         for pos_file in position_files:
@@ -58,7 +61,6 @@ for msh_file in os.listdir(opt_directory):
             if len(parts) == 2:
                 part1 = parts[0]
                 part2 = parts[1]
-                mesh_key = msh_file_path
                 
                 # Check if the file exists before reading
                 print(f"Checking if target CSV file exists: {generated_csv_file}")

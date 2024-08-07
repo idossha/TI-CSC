@@ -123,9 +123,9 @@ dependencies:
   - zlib=1.2.13=h8a1eda9_5
   - zstd=1.5.5=hc035e20_2
   - pip:
-      - fmm3dpy==1.0.0
-      - numpy==1.22.0
-      - simnibs==4.1.0
+      - fmm3dpy
+      - numpy
+      - pandas
 variables:
   CONDA_SUBDIR: osx-64
 prefix: /opt/miniconda3/envs/simnibs_env

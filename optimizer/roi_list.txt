@@ -1,1 +1,1 @@
-ROIs/transition.csv
+ROIs/Transition_lateral_C.csv
