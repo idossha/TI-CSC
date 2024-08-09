@@ -12,7 +12,7 @@ script_dir=$(pwd)
 
 # Call the ROI creator script
 echo "Running roi-creator.py..."
-python3 roi-creator.py
+#python3 roi-creator.py
 
 # Check if the ROI creation was successful
 if [ $? -eq 0 ]; then
@@ -30,7 +30,7 @@ export SUBJECT_NAME=$subject_name
 
 # Call the TI optimizer script
 echo "Running ti-optimizer.py..."
-simnibs_python ti-optimizer.py
+#simnibs_python ti-optimizer.py
 
 # Check if the TI optimization was successful
 if [ $? -eq 0 ]; then
@@ -42,7 +42,7 @@ fi
 
 # Call the ROI analyzer script
 echo "Running roi-analyzer.py..."
-python3 roi-analyzer.py
+#python3 roi-analyzer.py
 
 # Check if the ROI analysis was successful
 if [ $? -eq 0 ]; then
@@ -57,7 +57,7 @@ mesh_dir="$project_dir/Simulations/opt_$subject_name"
 
 # Run the process_mesh_files_new.sh script
 echo "Running process_mesh_files_new.sh..."
-./field-analysis/process_mesh_files_new.sh "$mesh_dir"
+./field-analysis/run_new_linux_process.sh "$mesh_dir"
 
 # Check if the mesh processing was successful
 if [ $? -eq 0 ]; then
