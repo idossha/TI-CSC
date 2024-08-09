@@ -1,3 +1,15 @@
+#documentation:
+#
+#this script worked on the liunx machine at home. 
+#
+#this was to container call:
+#
+#idossha@idmb-og:~/Desktop$ docker run --rm -it -v /home/idossha/Desktop/strengthen:/mnt/strengthen simnibs_fsl_matlab_updated
+
+#
+#
+#
+
 #!/bin/bash
 
 # Function to find MATLAB Runtime
@@ -55,14 +67,6 @@ mesh_dir=$1
 echo "Mesh directory: $mesh_dir"
 
 # Execute the MATLAB compiled script with the provided arguments
-shift 1
-args=
-while [ $# -gt 0 ]; do
-    token=$1
-    args="${args} \"${token}\""
-    shift
-done
-
-eval "\"${exe_dir}/new_linux_process\"" "$mesh_dir" $args
+eval "\"${exe_dir}/new_linux_process\"" "$mesh_dir"
 exit
 
