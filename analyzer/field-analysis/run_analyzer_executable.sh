@@ -30,7 +30,7 @@ else
       args="${args} \"${token}\"" 
       shift
   done
-  eval "\"${exe_dir}/new_linux_process\"" $args
+  eval "\"${exe_dir}/analyzer_executable\"" $args
 fi
 exit
 

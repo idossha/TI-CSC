@@ -1,4 +1,4 @@
-new_linux_process Executable
+analyzer_executable Executable
 
 1. Prerequisites for Deployment 
 
@@ -23,12 +23,12 @@ in the MathWorks Documentation Center.
 
 Files to Package for Standalone 
 ================================
--new_linux_process 
--run_new_linux_process.sh (shell script for temporarily setting environment variables and 
-                           executing the application)
+-analyzer_executable 
+-run_analyzer_executable.sh (shell script for temporarily setting environment variables 
+                             and executing the application)
    -to run the shell script, type
    
-       ./run_new_linux_process.sh <mcr_directory> <argument_list>
+       ./run_analyzer_executable.sh <mcr_directory> <argument_list>
        
     at Linux or Mac command prompt. <mcr_directory> is the directory 
     where MATLAB Runtime(R2024a) is installed or the directory where 
@@ -38,12 +38,12 @@ Files to Package for Standalone
     If you have MATLAB Runtime(R2024a) installed in 
     /mathworks/home/application/R2024a, run the shell script as:
     
-       ./run_new_linux_process.sh /mathworks/home/application/R2024a
+       ./run_analyzer_executable.sh /mathworks/home/application/R2024a
        
     If you have MATLAB installed in /mathworks/devel/application/matlab, 
     run the shell script as:
     
-       ./run_new_linux_process.sh /mathworks/devel/application/matlab
+       ./run_analyzer_executable.sh /mathworks/devel/application/matlab
 -MCRInstaller.zip
     Note: if end users are unable to download the MATLAB Runtime using the
     instructions in the previous section, include it when building your 
@@ -92,7 +92,7 @@ ${LD_LIBRARY_PATH}:MR/R2024a/runtime/glnxa64:MR/R2024a/bin/glnxa64:MR/R2024a/sys
         NOTE: The environment variable syntax utilizes forward 
               slashes (/), delimited by colons (:).  
         NOTE: When deploying standalone applications, you can
-              run the shell script file run_new_linux_process.sh 
+              run the shell script file run_analyzer_executable.sh 
               instead of setting environment variables. See 
               section 2 "Files to Deploy and Package".    
 
