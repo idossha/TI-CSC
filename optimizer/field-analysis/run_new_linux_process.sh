@@ -1,17 +1,10 @@
 #documentation:
-#
 #this script worked on the liunx machine at home. 
-#
 #this was to container call:
 #
 #idossha@idmb-og:~/Desktop$ docker run --rm -it -v /home/idossha/Desktop/strengthen:/mnt/strengthen simnibs_fsl_matlab_updated
 
-#
-#
-#
-
 #!/bin/bash
-
 # Function to find MATLAB Runtime
 find_matlab_runtime() {
     local potential_paths=(
@@ -27,7 +20,6 @@ find_matlab_runtime() {
             return 0
         fi
     done
-
     echo "MATLAB Runtime not found. Please install it or update the script with the correct path."
     exit 1
 }
@@ -54,13 +46,6 @@ echo "--------------------------------------"
 if [ ! -f "${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1" ]; then
     echo "libmwmclmcrrt.so.25.1 not found. Attempting to create a symlink to libmwmclmcrrt.so.24.1"
     ln -s ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.24.1 ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1
-fi
-
-# Check if required arguments are passed
-if [ $# -lt 1 ]; then
-    echo "Error: Not enough input arguments provided."
-    echo "Usage: $0 <mesh_dir>"
-    exit 1
 fi
 
 mesh_dir=$1

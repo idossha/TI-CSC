@@ -1,36 +1,57 @@
-#!/bin/sh
-# script for execution of deployed applications
+#documentation:
+#this script worked on the liunx machine at home. 
+#this was to container call:
 #
-# Sets up the MATLAB Runtime environment for the current $ARCH and executes 
-# the specified command.
-#
+#idossha@idmb-og:~/Desktop$ docker run --rm -it -v /home/idossha/Desktop/strengthen:/mnt/strengthen simnibs_fsl_matlab_updated
+
+#!/bin/bash
+# Function to find MATLAB Runtime
+find_matlab_runtime() {
+    local potential_paths=(
+        "/usr/local/MATLAB/MATLAB_Runtime/R2024a"
+        "/usr/local/MATLAB/MATLAB_Runtime/v951"
+        "/opt/MATLAB/MATLAB_Runtime/R2024a"
+        "/home/$USER/MATLAB_Runtime/R2024a"
+    )
+
+    for path in "${potential_paths[@]}"; do
+        if [ -d "$path" ]; then
+            echo "$path"
+            return 0
+        fi
+    done
+    echo "MATLAB Runtime not found. Please install it or update the script with the correct path."
+    exit 1
+}
+
 exe_name=$0
-exe_dir=`dirname "$0"`
-echo "------------------------------------------"
-if [ "x$1" = "x" ]; then
-  echo Usage:
-  echo    $0 \<deployedMCRroot\> args
-else
-  echo Setting up environment variables
-  MCRROOT="$1"
-  echo ---
-  LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;
-  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
-  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;
-  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/opengl/lib/glnxa64;
-  export LD_LIBRARY_PATH;
-  echo LD_LIBRARY_PATH is ${LD_LIBRARY_PATH};
-# Preload glibc_shim in case of RHEL7 variants
-  test -e /usr/bin/ldd &&  ldd --version |  grep -q "(GNU libc) 2\.17"  \
-            && export LD_PRELOAD="${MCRROOT}/bin/glnxa64/glibc-2.17_shim.so"
-  shift 1
-  args=
-  while [ $# -gt 0 ]; do
-      token=$1
-      args="${args} \"${token}\"" 
-      shift
-  done
-  eval "\"${exe_dir}/analyzer_executable\"" $args
+exe_dir=$(cd "$(dirname $0)" && pwd) # Get the absolute path of the script directory
+
+echo "--------------------------------------"
+echo "Setting up environment variables"
+MCROOT=$(find_matlab_runtime)
+echo "MATLAB Runtime root: ${MCROOT}"
+echo "--------------------------------------"
+
+LD_LIBRARY_PATH=.:${MCROOT}/runtime/glnxa64
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCROOT}/bin/glnxa64
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCROOT}/sys/os/glnxa64
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCROOT}/sys/java/jre/glnxa64/jre/lib/amd64
+export LD_LIBRARY_PATH
+
+echo "LD_LIBRARY_PATH is ${LD_LIBRARY_PATH}"
+echo "--------------------------------------"
+
+# Create a symlink if the exact version of the library is missing
+if [ ! -f "${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1" ]; then
+    echo "libmwmclmcrrt.so.25.1 not found. Attempting to create a symlink to libmwmclmcrrt.so.24.1"
+    ln -s ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.24.1 ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1
 fi
+
+mesh_dir=$1
+echo "Mesh directory: $mesh_dir"
+
+# Execute the MATLAB compiled script with the provided arguments
+eval "\"${exe_dir}/analyzer_executable\"" "$mesh_dir"
 exit
 
