@@ -82,7 +82,7 @@ fi
 # Set the correct path for the output.csv file
 output_csv="$mesh_dir/output.csv"
 echo "Opening $output_csv..."
-open "$output_csv"
+#open "$output_csv"
 
 # Run the mesh selector script
 bash mesh-selector.sh

@@ -96,7 +96,7 @@ done
 transform_gm_to_nifti
 process_mesh_files
 run_sphere_analysis
-generate_screenshots "$nifti_dir" "$screenshots_dir"
+#generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"
 
