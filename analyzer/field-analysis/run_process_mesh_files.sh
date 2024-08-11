@@ -1,7 +1,3 @@
-#documentation:
-#this script worked on the liunx machine at home. 
-#this was to container call:
-#
 #idossha@idmb-og:~/Desktop$ docker run --rm -it -v /home/idossha/Desktop/strengthen:/mnt/strengthen simnibs_fsl_matlab_updated
 
 #!/bin/bash
@@ -52,6 +48,8 @@ mesh_dir=$1
 echo "Mesh directory: $mesh_dir"
 
 # Execute the MATLAB compiled script with the provided arguments
-eval "\"${exe_dir}/analyzer_executable\"" "$mesh_dir"
+eval "\"${exe_dir}/process_mesh_files\"" "$mesh_dir"
 exit
+
+
 
