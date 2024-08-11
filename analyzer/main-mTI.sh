@@ -69,7 +69,7 @@ transform_gm_to_nifti() {
 # Function to process mesh files
 process_mesh_files() {
     echo "Processing mesh files..."
-    process_mesh_script_path="$script_dir/field-analysis/run_analyzer_executable.sh"
+    process_mesh_script_path="$script_dir/field-analysis/run_process_mesh_files.sh"
     bash "$process_mesh_script_path" "$whole_brain_mesh_dir"
     if [ $? -ne 0 ]; then
         echo "Mesh files processing failed"
