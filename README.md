@@ -4,7 +4,7 @@
 
 ---
 
-Currently MATLAB executables or GUI functionality does not work on ARM base Apple machines. 
+Currently MATLAB executables or GUI functionality does not work on ARM base Apple machines. AMD/Intel should work smooth. Please ping if you encounter bugs.
 
 ---
 
@@ -27,29 +27,16 @@ Currently MATLAB executables or GUI functionality does not work on ARM base Appl
 The leadfield is only necessary if you want to run optimization scripts.
 
 
-4. open terminal and run the following command:
+4. open terminal and run the starter bash script.
 
-genreal form:
-docker run -v /path/to/project_name:/mnt/project_name --rm -ti  image-name:tag
+`bash start_TI_docker.sh`
 
-example:
-docker run -v /home/idossha/Destkop/strengthe:/mnt/strengthen --rm -ti  package-compelte:update1
 
----
+Potential troubleshooting:
 
-If you wish to run applications: SimNIBS, Freesurfer, Gmsh  with GUI addional steps are required:
+* Make sure you have XQuartz or Xming if you are working on a mac or windows respectively. Linux i xh xh xhost +local:docker
 
-1. Type the following command on your host machine: xhost +local:docker
-2. Make sure you have XQuartz or Xming if you are working on a mac or windows respectively. Linux i xh xh xhost +local:docker
-3. Run your docker command as follow (or put it in a bash script for easier execution):
-
-docker run --rm -it \
-    -e DISPLAY=$DISPLAY \
-    -v /tmp/.11-unix/tmp/.X11-unix \
-    -v /path/to/project:/mnt/project_name
-    image_name:tag
-
-ps might need to add also that: -e LIBGL_ALWAYS_INDIRECT=1
+* might need to change the last line based on the specific tag you are using.
 
 ---
 
