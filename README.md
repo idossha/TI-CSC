@@ -57,7 +57,7 @@ ps might need to add also that: -e LIBGL_ALWAYS_INDIRECT=1
 
 * In the main scripts all the automatic screenshot functions are commented out. If you wish to have those simply remove comments.
 
-* It is highly recommended before reexecuting analysis / optimization so clear or remove previous outputs. 
+* It is highly recommended before re-executing analysis / optimization so clear or remove previous outputs. 
 
 
 ---
