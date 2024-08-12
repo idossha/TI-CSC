@@ -1,17 +1,17 @@
- linux development for docker
- Developed by Ido Haber - ihaber@wisc.edu
- August 2024
+TI-CSC Toolbox for docker image installation. See full toolbox at TI-2024 repo.
+Developed by Ido Haber - ihaber@wisc.edu
+August 2024
 
 ---
 
-Currently MATLAB executables or GUI functionality does not work on ARM base Apple machines. AMD/Intel should work smooth. Please ping if you encounter bugs.
+Currently MATLAB Runtime and GUI functionality do not work on ARM base Apple machines. AMD/Intel should work smooth. Please ping if you encounter bugs.
 
 ---
 
 #### How to use:
 
-1. Make sure you have docker Desktop / docker engine on you machine.
-2. Download the image from docker hub
+1. Make sure you have [docker Desktop](https://www.docker.com/products/docker-desktop/) / [docker engine](https://docs.docker.com/engine/install/) on you machine.
+2. Download the [image](https://hub.docker.com/r/idossha/ti-package) from docker hub
 3. Make sure you have the project directory set up correctly:
 
         project_name 
@@ -25,6 +25,7 @@ Currently MATLAB executables or GUI functionality does not work on ARM base Appl
 
 
 The leadfield is only necessary if you want to run optimization scripts.
+Also, for optimization allocate more RAM to docker. Reccomanded >32GB.
 
 
 4. open terminal and run the starter bash script.
@@ -50,7 +51,7 @@ Potential troubleshooting:
 ---
 
 #### The container has:
-FSL
+FSL 6.0.1
 Freesurfer 7.1.1
 SimNIBS 4.1.0
 MATLAB Runtime r2024a
