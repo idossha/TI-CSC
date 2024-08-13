@@ -67,13 +67,13 @@ github repo with scripts
 
 ---
 
-### Project Functionality:
+## Project Functionality:
 
 This is a CLI that allows users to:
 1. Optimize montages for Temporal Interference Stimulation.
 2. Analyze and visualize unipolar and bipolar montages very efficiently. 
 
-# Analyzer Requirements:
+#### Analyzer Requirements:
 
 1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` subdir.
 3. Tensor file (only for anisotropic simulation)
@@ -84,7 +84,7 @@ This is a CLI that allows users to:
 
 If you run multiple consecutive analyses, it is highly recommended to move the previous `sim_SubjectName` elsewhere.
 
-# Optimizer Requirements:
+#### Optimizer Requirements:
 
 1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` and `leadfield_SubjectID` subdirs.
 
