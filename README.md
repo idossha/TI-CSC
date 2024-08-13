@@ -8,7 +8,7 @@ Currently MATLAB Runtime and GUI functionality do not work on ARM base Apple mac
 
 ---
 
-#### How to use:
+#### How to run docker image:
 
 1. Make sure you have [docker Desktop](https://www.docker.com/products/docker-desktop/) / [docker engine](https://docs.docker.com/engine/install/) on you machine.
 2. Download the [image](https://hub.docker.com/r/idossha/ti-package) from docker hub
@@ -25,7 +25,7 @@ Currently MATLAB Runtime and GUI functionality do not work on ARM base Apple mac
 
 
 The leadfield is only necessary if you want to run optimization scripts.
-Also, for optimization allocate more RAM to docker. Reccomanded >32GB.
+Also, for optimization allocate more RAM to docker. Recommended >32GB.
 
 
 4. open terminal and run the starter bash script.
@@ -36,7 +36,6 @@ Also, for optimization allocate more RAM to docker. Reccomanded >32GB.
 Potential troubleshooting:
 
 * Make sure you have XQuartz or Xming if you are working on a Mac or Windows respectively. Linux should be fine out of the box.
-
 * Might need to change the last line based on the specific tag you are using.
 
 ---
@@ -44,7 +43,6 @@ Potential troubleshooting:
 #### TIPS:
 
 * In the main scripts all the automatic screenshot functions are commented out. If you wish to have those simply remove comments.
-
 * It is highly recommended before re-executing analysis / optimization so clear or remove previous outputs. 
 
 
@@ -69,6 +67,33 @@ github repo with scripts
 
 ---
 
+### Project Functionality:
+
+This is a CLI that allows users to:
+1. Optimize montages for Temporal Interference Stimulation.
+2. Analyze and visualize unipolar and bipolar montages very efficiently. 
+
+# Analyzer Requirements:
+
+1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` subdir.
+3. Tensor file (only for anisotropic simulation)
+
+**How to run:**
+
+`bash start-ana.sh` and follow the prompts. 
+
+If you run multiple consecutive analyses, it is highly recommended to move the previous `sim_SubjectName` elsewhere.
+
+# Optimizer Requirements:
+
+1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` and `leadfield_SubjectID` subdirs.
+
+**How to run:** 
+
+* If you have not created leadfield matrix yet, run `simnibs_python leadfield.py` 
+* Once leadfiled is created, run `bash start-opt.sh` and follow the prompts.
+
+---
 
 cheers
 
