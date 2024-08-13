@@ -1,6 +1,6 @@
-TI-CSC Toolbox for docker image installation. See full toolbox at TI-2024 repo.
-Developed by Ido Haber - ihaber@wisc.edu
-August 2024
+Partial TI-CSC Toolbox for docker image. See full toolbox at TI-2024 repo.
+Developed and maintained by Ido Haber - ihaber@wisc.edu
+last update: August 2024
 
 ---
 
@@ -35,9 +35,9 @@ Also, for optimization allocate more RAM to docker. Reccomanded >32GB.
 
 Potential troubleshooting:
 
-* Make sure you have XQuartz or Xming if you are working on a mac or windows respectively. Linux i xh xh xhost +local:docker
+* Make sure you have XQuartz or Xming if you are working on a Mac or Windows respectively. Linux should be fine out of the box.
 
-* might need to change the last line based on the specific tag you are using.
+* Might need to change the last line based on the specific tag you are using.
 
 ---
 
@@ -58,6 +58,17 @@ MATLAB Runtime r2024a
 github repo with scripts
 
 ---
+
+#### For rebuilding an updated image yourself:
+
+1. Make sure you have docker engine / desktop on your machine.
+2. Place all these files in the same edirectory.
+3. put in the following command: `docker build --no-cache -t <repo_name>:<tag_name> .` 
+4. Verify your image works locally.
+5. Push to docker hub.
+
+---
+
 
 cheers
 
