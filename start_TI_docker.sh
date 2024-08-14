@@ -3,6 +3,7 @@
 
 # Allow local root access to X server
 xhost +local:root
+DISPLAY=host.docker.internal:0
 
 # Display a note regarding processor compatibility
 echo "Note: This pipeline is not fully ready for ARM processors (e.g., Apple Silicon). It is good for Intel/AMD processors."
@@ -25,7 +26,7 @@ if [[ "$OS_TYPE" == "Linux" ]]; then
     -e LIBGL_ALWAYS_SOFTWARE=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.0.1 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash" 
+    idossha/ti-package:v1.0.2 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash" 
 elif [[ "$OS_TYPE" == "macOS" ]]; then
   docker run --rm -ti \
     -e DISPLAY=$DISPLAY \
