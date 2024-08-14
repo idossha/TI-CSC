@@ -25,14 +25,14 @@ if [[ "$OS_TYPE" == "Linux" ]]; then
     -e LIBGL_ALWAYS_SOFTWARE=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.0.1 #needed to be changed based on the tag
+    idossha/ti-package:v1.0.1 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash" 
 elif [[ "$OS_TYPE" == "macOS" ]]; then
   docker run --rm -ti \
     -e DISPLAY=$DISPLAY \
     -e DISPLAY=docker.for.mac.host.internal:0 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.0.2 #needed to be changed based on the tag
+    idossha/ti-package:v1.0.2 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash" 
 else
   echo "Unsupported OS type. Please enter 'Linux' or 'macOS'."
 fi
