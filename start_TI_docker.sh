@@ -1,9 +1,7 @@
-
 #!/bin/bash
 
 # Allow local root access to X server
 xhost +local:root
-DISPLAY=host.docker.internal:0
 
 # Display a note regarding processor compatibility
 echo "Note: This pipeline is not fully ready for ARM processors (e.g., Apple Silicon). It is good for Intel/AMD processors."
@@ -26,18 +24,18 @@ if [[ "$OS_TYPE" == "Linux" ]]; then
     -e LIBGL_ALWAYS_SOFTWARE=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.0.2 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash" 
+    ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 elif [[ "$OS_TYPE" == "macOS" ]]; then
+  DISPLAY=host.docker.internal:0
   docker run --rm -ti \
     -e DISPLAY=$DISPLAY \
     -e DISPLAY=docker.for.mac.host.internal:0 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.0.2 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash" 
+    idossha/ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 else
   echo "Unsupported OS type. Please enter 'Linux' or 'macOS'."
 fi
 
 # Revert X server access permissions
 xhost -local:root
-
