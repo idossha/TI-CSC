@@ -24,7 +24,7 @@ if [[ "$OS_TYPE" == "Linux" ]]; then
     -e LIBGL_ALWAYS_SOFTWARE=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+    idossha/ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 elif [[ "$OS_TYPE" == "macOS" ]]; then
   DISPLAY=host.docker.internal:0
   docker run --rm -ti \
