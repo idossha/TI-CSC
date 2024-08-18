@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Allow local root access to X server
@@ -26,16 +27,31 @@ if [[ "$OS_TYPE" == "Linux" ]]; then
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
     idossha/ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 elif [[ "$OS_TYPE" == "macOS" ]]; then
-  DISPLAY=host.docker.internal:0
-  docker run --rm -ti \
-    -e DISPLAY=$DISPLAY \
-    -e DISPLAY=docker.for.mac.host.internal:0 \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+  # Prompt for processor type if macOS
+  echo "Are you using an Intel/AMD processor or Apple Silicon (ARM)? (Enter 'Intel' or 'ARM'):"
+  read PROC_TYPE
+
+  if [[ "$PROC_TYPE" == "Intel" ]]; then
+    DISPLAY=host.docker.internal:0
+    docker run --rm -ti \
+      -e DISPLAY=$DISPLAY \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
+      idossha/ti-package:v1.0.3 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+  elif [[ "$PROC_TYPE" == "ARM" ]]; then
+    DISPLAY=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}'):0
+    docker run --rm -ti \
+      -e DISPLAY=$DISPLAY \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
+      idossha/ti-package:v1.0.3-arm bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+  else
+    echo "Unsupported processor type. Please enter 'Intel' or 'ARM'."
+  fi
 else
   echo "Unsupported OS type. Please enter 'Linux' or 'macOS'."
 fi
 
 # Revert X server access permissions
 xhost -local:root
+
