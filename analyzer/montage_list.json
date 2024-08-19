@@ -139,6 +139,16 @@
         "E095",
         "E070"
       ]
+    ],
+    "classic_transition": [
+      [
+        "E080",
+        "E107"
+      ],
+      [
+        "E131",
+        "E160"
+      ]
     ]
   },
   "multi_polar_montages": {
