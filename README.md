@@ -1,123 +1,107 @@
-TI-CSC Toolbox for docker image.
-Developed and maintained by Ido Haber - ihaber@wisc.edu
-last update: August 19, 2024
+
+# TI-CSC Toolbox for Docker Image
+
+**Developed and maintained by Ido Haber - [ihaber@wisc.edu](mailto:ihaber@wisc.edu)**  
+**Last update: August 19, 2024**
 
 ---
 
-Compatible with: Linux, Windows, macOS
-Currently MATLAB Runtime and GUI functionality do not work on ARM architecture (Apple silicon). 
-Please ping if you encounter bugs.
+### Overview
+
+The TI-CSC Toolbox is designed for researchers and engineers involved in Temporal Interference (TI) stimulation. This CLI-based toolbox facilitates the optimization of montages and the analysis of unipolar and bipolar montages, with optional GUI-based visualization of simulations.
 
 ---
 
-#### How to run docker image:
+### Compatibility
 
-1. Make sure you have [docker Desktop](https://www.docker.com/products/docker-desktop/) / [docker engine](https://docs.docker.com/engine/install/) on you machine.
-* If you are using macOS / Windows, make sure you have XQuartz or Xming available. Only necessary if you wish to have GUI. 
-2. Pull the [image](https://hub.docker.com/r/idossha/ti-package) from docker hub. 
-3. Make sure you have the project directory set up correctly:
-
-        project_name 
-            |___Simulations
-            |
-            |___Subjects
-                   |___m2m_001
-                   |___m2m_002
-
-
-4. On Unix systems, open terminal and run the starter bash script.
-
-`bash start_TI_docker.sh`
-
-* If you are using Windows and you do not have bash available you can mannually run the docker command for Windows.
-
-`docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\prject_dir:/mnt/project_dir idossha/ti-package:vx.x.x`
+- **Operating Systems:** Linux, Windows, macOS
+- **Important Notes:**  
+  - **MATLAB Runtime and GUI functionality** do not currently work on ARM architecture (Apple silicon).  
+  - Please reach out if you encounter any bugs or issues.
 
 ---
 
-#### TIPS:
+### How to Run the Docker Image
 
-* In the main scripts all the automatic screenshot functions are commented out. If you wish to have those simply remove comments.
-* It is highly recommended before re-executing analysis / optimization to clear or remove previous outputs. 
-* Sometimes the MATLAB Runtimes yells, but still give the correct output.
+1. **Ensure Docker is Installed:**
+   - Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop) for macOS and Windows, or [Docker Engine](https://docs.docker.com/engine/install/) for Linux.
+
+2. **Set Up XQuartz or Xming:**
+   - For macOS: Install [XQuartz](https://www.xquartz.org/).
+   - For Windows: Install [Xming](https://sourceforge.net/projects/xming/).
+   - *Note: These are only necessary if you plan to use GUI functionality.*
+
+3. **Pull the Docker Image:**
+   - Use the following command to pull the image from Docker Hub:
+     ```sh
+     docker pull idossha/ti-package:vx.x.x
+     ```
+   - Replace `vx.x.x` with the version number you intend to use.
+
+4. **Set Up Project Directory:**
+   - Ensure your project directory follows this structure:
+     ```
+     project_name/
+     ├── Simulations/
+     └── Subjects/
+         ├── m2m_001/
+         └── m2m_002/
+     ```
+
+5. **Run the Docker Container:**
+   - On Unix systems (Linux/macOS), use the provided starter bash script:
+     ```sh
+     bash start_TI_docker.sh
+     ```
+   - On Windows, if you do not have bash available, run the following command manually:
+     ```sh
+     docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\project_dir:/mnt/project_dir idossha/ti-package:vx.x.x
+     ```
+   - *Replace `C:\path\to\project_dir` with the actual path to your project directory on Windows.*
 
 ---
 
-#### The container has:
-FSL 6.0.1 
-Freesurfer 7.1.1 
-SimNIBS 4.1.0 
-MATLAB Runtime r2024a 
-git repo with scripts
+### Tips
 
-It also have commonly used CL tools like VIM, NVIM, TMUX, git and probably all that you need.
+- **Automatic Screenshots:**  
+  If you wish to enable automatic screenshots in the main scripts, simply uncomment the relevant lines in the script files.
+
+- **Clearing Previous Outputs:**  
+  Before re-executing analysis or optimization, it is highly recommended to clear or remove previous outputs to avoid conflicts.
+
+- **MATLAB Runtime Warnings:**  
+  MATLAB Runtime may display warnings, but they generally do not affect the correctness of the output.
 
 ---
 
-## Project Functionality:
+### Container Contents
 
-This is a CLI that allows users to:
-1. Optimize montages for Temporal Interference Stimulation.
-2. Analyze and visualize unipolar and bipolar montages very efficiently. 
-* even thouth it is a CLI, GUI is available for visualization of simulations.
+The Docker container includes the following tools and libraries:
+
+- **FSL** 6.0.1
+- **Freesurfer** 7.1.1
+- **SimNIBS** 4.1.0
+- **MATLAB Runtime** r2024a
+- Git repository with analysis and optimization scripts
+- Commonly used CLI tools: VIM, NVIM, TMUX, Git, and more.
+
+---
+
+### Project Functionality
+
+This CLI toolbox allows users to:
+
+1. **Optimize Montages for Temporal Interference Stimulation.**
+2. **Analyze and Visualize** unipolar and bipolar montages efficiently.
+   - *Note: While this is primarily a CLI tool, GUI visualization is available for simulation results.*
 
 #### Analyzer Requirements:
 
-1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` subdir.
-2. Tensor file (only for anisotropic simulation)
+1. A project directory containing the `Subjects` subdirectory with `m2m_SubjectID` directories.
+2. A tensor file (required only for anisotropic simulation).
 
-**How to run:**
+**How to Run:**
 
-`bash start-ana.sh` and follow the prompts. 
-
-If you run multiple consecutive analyses, it is highly recommended to move the previous `sim_SubjectID` elsewhere.
-
-#### Optimizer Requirements:
-
-1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID`.
-
-**How to run:** 
-
-* If you have not created leadfield matrix yet, run `simnibs_python leadfield.py`. Make sure it created and populated `leadfield_SubjectID` subdir next to `m2m_SubjectID`.
-* Once leadfiled is created, run `bash start-opt.sh` and follow the prompts.
-
-The leadfield is only necessary if you want to run optimization scripts.
-Also, for optimization allocate more RAM to docker. Recommended >32GB.
-
-
----
-
-
-### For Doccumentation Purposes:
-
-
-On the To Do list:
-
-[ ] figure out why MATLAB Runtime does not work on silicon 
-[ ] figure out GUI solution for silicon 
-[ ] figure out a solution for better placement for ROI & Montage JSONs 
-[ ] create an in house fsl image to replace exisitng image. Must used Ubuntu 20.04 
-[ ] create an in house freesurfer image to be used. Version 7.4.1 
-[ ] improve optimizer prompting to behave similarly to analyzer 
-[ ] figure out a way to eliminate nvim popups 
-[ ] figure out FSL GUI problem 
-[ ] add similar ROI analysis but to patches of cortex with different atlases 
-[ ] add GUI to pipeline to replace prompting 
-
----
-
-
-For matlab runtime possible solution on silicon chip:
-
-a. https://github.com/microsoft/WSL/issues/286 follow `metorm` comment
-b. recompile matlab as the `Shubham` suggests here: https://www.mathworks.com/matlabcentral/answers/478705-standalone-application-cannot-find-ctf
-
-
-cheers
-
-
-
-
-
-
+```sh
+bash start-ana.sh
 
