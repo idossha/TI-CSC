@@ -15,7 +15,7 @@ read LOCAL_PROJECT_DIR
 PROJECT_DIR_NAME=$(basename "$LOCAL_PROJECT_DIR")
 
 # Prompt the user to specify their operating system
-echo "Are you running on Linux or macOS? (Enter 'Linux' or 'macOS'):"
+echo "Are you running on Linux, macOS or Windows? (Example enter 'Linux'):"
 read OS_TYPE
 
 # Run the Docker container based on the user's OS
@@ -48,8 +48,11 @@ elif [[ "$OS_TYPE" == "macOS" ]]; then
   else
     echo "Unsupported processor type. Please enter 'Intel' or 'ARM'."
   fi
+elif [[ "$OS_TYPE" == "Windows" ]]; then
+  echo "Enter the following command in your terminal:"
+  echo "docker run --rm -ti -v C:\path\to\prject_dir:/mnt/project_dir idossha/ti-package:v1.0.3"
 else
-  echo "Unsupported OS type. Please enter 'Linux' or 'macOS'."
+  echo "Unsupported OS type. Please enter 'Linux', 'macOS', or 'Windows'."
 fi
 
 # Revert X server access permissions

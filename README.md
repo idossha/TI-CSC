@@ -42,17 +42,17 @@ Also, for optimization allocate more RAM to docker. Recommended >32GB.
 #### TIPS:
 
 * In the main scripts all the automatic screenshot functions are commented out. If you wish to have those simply remove comments.
-* It is highly recommended before re-executing analysis / optimization so clear or remove previous outputs. 
+* It is highly recommended before re-executing analysis / optimization to clear or remove previous outputs. 
 * Sometimes the MATLAB Runtimes yells, but still give the correct output.
 
 ---
 
 #### The container has:
-FSL 6.0.1
-Freesurfer 7.1.1
-SimNIBS 4.1.0
-MATLAB Runtime r2024a
-github repo with scripts
+FSL 6.0.1 
+Freesurfer 7.1.1 
+SimNIBS 4.1.0 
+MATLAB Runtime r2024a 
+git repo with scripts 
 
 ---
 
@@ -81,7 +81,7 @@ This is a CLI that allows users to:
 
 `bash start-ana.sh` and follow the prompts. 
 
-If you run multiple consecutive analyses, it is highly recommended to move the previous `sim_SubjectName` elsewhere.
+If you run multiple consecutive analyses, it is highly recommended to move the previous `sim_SubjectID` elsewhere.
 
 #### Optimizer Requirements:
 
