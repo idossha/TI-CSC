@@ -93,16 +93,16 @@ Also, for optimization allocate more RAM to docker. Recommended >32GB.
 
 On the To Do list:
 
-[] figure out why MATLAB Runtime does not work on silicon
-[] figure out GUI solution for silicon
-[] figure out a solution for better placement for ROI & Montage JSONs
-[] create an in house fsl image to replace exisitng image. Must used Ubuntu 20.04
-[] create an in house freesurfer image to be used. Version 7.4.1
-[] improve optimizer prompting to behave similarly to analyzer
-[] figure out a way to eliminate nvim popups
-[] figure out FSL GUI problem
-[] add similar ROI analysis but to patches of cortex with different atlases
-[] add GUI to pipeline to replace prompting
+[ ] figure out why MATLAB Runtime does not work on silicon 
+[ ] figure out GUI solution for silicon 
+[ ] figure out a solution for better placement for ROI & Montage JSONs 
+[ ] create an in house fsl image to replace exisitng image. Must used Ubuntu 20.04 
+[ ] create an in house freesurfer image to be used. Version 7.4.1 
+[ ] improve optimizer prompting to behave similarly to analyzer 
+[ ] figure out a way to eliminate nvim popups 
+[ ] figure out FSL GUI problem 
+[ ] add similar ROI analysis but to patches of cortex with different atlases 
+[ ] add GUI to pipeline to replace prompting 
 
 ---
 
