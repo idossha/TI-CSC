@@ -4,21 +4,6 @@ last update: August 19, 2024
 
 ---
 
-On the To Do list:
-
-[] figure out why MATLAB Runtime does not work on silicon
-[] figure out GUI solution for silicon
-[] figure out a solution for better placement for ROI & Montage JSONs
-[] create an in house fsl image to replace exisitng image. Must used Ubuntu 20.04
-[] create an in house freesurfer image to be used. Version 7.4.1
-[] improve optimizer prompting to behave similarly to analyzer
-[] figure out a way to eliminate nvim popups
-[] figure out FSL GUI problem
-[] add similar ROI analysis but to patches of cortex with different atlases
-[] add GUI to pipeline to replace prompting
-
----
-
 Compatible with: Linux, Windows, macOS (intel)
 Currently MATLAB Runtime and GUI functionality do not work on ARM architecture (Apple silicon). 
 Please ping if you encounter bugs.
@@ -108,6 +93,32 @@ If you run multiple consecutive analyses, it is highly recommended to move the p
 * Once leadfiled is created, run `bash start-opt.sh` and follow the prompts.
 
 ---
+
+
+### For Doccumentation Purposes:
+
+
+On the To Do list:
+
+[] figure out why MATLAB Runtime does not work on silicon
+[] figure out GUI solution for silicon
+[] figure out a solution for better placement for ROI & Montage JSONs
+[] create an in house fsl image to replace exisitng image. Must used Ubuntu 20.04
+[] create an in house freesurfer image to be used. Version 7.4.1
+[] improve optimizer prompting to behave similarly to analyzer
+[] figure out a way to eliminate nvim popups
+[] figure out FSL GUI problem
+[] add similar ROI analysis but to patches of cortex with different atlases
+[] add GUI to pipeline to replace prompting
+
+---
+
+
+For matlab runtime possible solution on silicon chip:
+
+a. https://github.com/microsoft/WSL/issues/286 follow `metorm` comment
+b. recompile matlab as the `Shubham` suggests here: https://www.mathworks.com/matlabcentral/answers/478705-standalone-application-cannot-find-ctf
+
 
 cheers
 
