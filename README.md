@@ -1,17 +1,20 @@
 Partial TI-CSC Toolbox for docker image. See full toolbox at TI-2024 repo.
 Developed and maintained by Ido Haber - ihaber@wisc.edu
-last update: August 2024
+last update: August 19, 2024
 
 ---
 
-Currently MATLAB Runtime and GUI functionality do not work on ARM base Apple machines. AMD/Intel should work smooth. Please ping if you encounter bugs.
+Compatible with: Linux, Windows, macOS (intel)
+Currently MATLAB Runtime and GUI functionality do not work on ARM architecture (Apple silicon). 
+Please ping if you encounter bugs.
 
 ---
 
 #### How to run docker image:
 
 1. Make sure you have [docker Desktop](https://www.docker.com/products/docker-desktop/) / [docker engine](https://docs.docker.com/engine/install/) on you machine.
-2. Download the [image](https://hub.docker.com/r/idossha/ti-package) from docker hub
+* If you are using macOS / Windows, make sure you have XQuartz or Xming available. Only necessary if you wish to have GUI. 
+2. Pull the [image](https://hub.docker.com/r/idossha/ti-package) from docker hub. 
 3. Make sure you have the project directory set up correctly:
 
         project_name 
@@ -32,11 +35,7 @@ Also, for optimization allocate more RAM to docker. Recommended >32GB.
 
 `bash start_TI_docker.sh`
 
-
-Potential troubleshooting:
-
-* Make sure you have XQuartz or Xming if you are working on a Mac or Windows respectively. Linux should be fine out of the box.
-* Might need to change the last line based on the specific tag you are using.
+* If you are using Windows and you do not have bash available you can mannually run the docker command for Windows which can be found in the script above.
 
 ---
 
@@ -44,7 +43,7 @@ Potential troubleshooting:
 
 * In the main scripts all the automatic screenshot functions are commented out. If you wish to have those simply remove comments.
 * It is highly recommended before re-executing analysis / optimization so clear or remove previous outputs. 
-
+* Sometimes the MATLAB Runtimes yells, but still give the correct output.
 
 ---
 
