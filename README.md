@@ -1,4 +1,4 @@
-Partial TI-CSC Toolbox for docker image. See full toolbox at TI-2024 repo.
+TI-CSC Toolbox for docker image.
 Developed and maintained by Ido Haber - ihaber@wisc.edu
 last update: August 19, 2024
 
@@ -23,19 +23,15 @@ Please ping if you encounter bugs.
             |___Subjects
                    |___m2m_001
                    |___m2m_002
-                   |___leadfield_001
-                   |___leadfield_002
 
 
-The leadfield is only necessary if you want to run optimization scripts.
-Also, for optimization allocate more RAM to docker. Recommended >32GB.
-
-
-4. open terminal and run the starter bash script.
+4. On Unix systems, open terminal and run the starter bash script.
 
 `bash start_TI_docker.sh`
 
-* If you are using Windows and you do not have bash available you can mannually run the docker command for Windows which can be found in the script above.
+* If you are using Windows and you do not have bash available you can mannually run the docker command for Windows.
+
+`docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\prject_dir:/mnt/project_dir idossha/ti-package:vx.x.x`
 
 ---
 
@@ -52,17 +48,9 @@ FSL 6.0.1
 Freesurfer 7.1.1 
 SimNIBS 4.1.0 
 MATLAB Runtime r2024a 
-git repo with scripts 
+git repo with scripts
 
----
-
-#### For rebuilding an updated image yourself:
-
-1. Make sure you have docker engine / desktop on your machine.
-2. Place all these files in the same edirectory.
-3. put in the following command: `docker build --no-cache -t <repo_name>:<tag_name> .` 
-4. Verify your image works locally.
-5. Push to docker hub.
+It also have commonly used CL tools like VIM, NVIM, TMUX, git and probably all that you need.
 
 ---
 
@@ -71,11 +59,12 @@ git repo with scripts
 This is a CLI that allows users to:
 1. Optimize montages for Temporal Interference Stimulation.
 2. Analyze and visualize unipolar and bipolar montages very efficiently. 
+* even thouth it is a CLI, GUI is available for visualization of simulations.
 
 #### Analyzer Requirements:
 
 1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` subdir.
-3. Tensor file (only for anisotropic simulation)
+2. Tensor file (only for anisotropic simulation)
 
 **How to run:**
 
@@ -85,12 +74,16 @@ If you run multiple consecutive analyses, it is highly recommended to move the p
 
 #### Optimizer Requirements:
 
-1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID` and `leadfield_SubjectID` subdirs.
+1. Project directory containing `Subjects` subdirectory with `m2m_SubjectID`.
 
 **How to run:** 
 
-* If you have not created leadfield matrix yet, run `simnibs_python leadfield.py` 
+* If you have not created leadfield matrix yet, run `simnibs_python leadfield.py`. Make sure it created and populated `leadfield_SubjectID` subdir next to `m2m_SubjectID`.
 * Once leadfiled is created, run `bash start-opt.sh` and follow the prompts.
+
+The leadfield is only necessary if you want to run optimization scripts.
+Also, for optimization allocate more RAM to docker. Recommended >32GB.
+
 
 ---
 
