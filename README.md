@@ -2,13 +2,24 @@
 # TI-CSC Toolbox for Docker Image
 
 **Developed and maintained by Ido Haber - [ihaber@wisc.edu](mailto:ihaber@wisc.edu)**  
-**Last update: August 19, 2024**
+**Last update: August 20, 2024**
 
 ---
 
 ### Overview
 
-The TI-CSC Toolbox is designed for researchers and engineers involved in Temporal Interference (TI) stimulation. This CLI-based toolbox facilitates the optimization of montages and the analysis of unipolar and bipolar montages, with optional GUI-based visualization of simulations.
+The TI-CSC Toolbox is designed for researchers and engineers involved in Temporal Interference (TI) stimulation. This CLI-based toolbox facilitates the optimization of montages and the analysis of unipolar and bipolar montages. All dependencies are preinstalled & configured using docker, to facilitate easy of use and collaboration.
+
+### Container Contents
+
+The Docker container includes the following tools and libraries:
+
+- **FSL** 6.0.1
+- **Freesurfer** 7.1.1
+- **SimNIBS** 4.1.0
+- **MATLAB Runtime** r2024a
+- Git repository with analysis and optimization scripts
+- Commonly used CLI tools: VIM, NVIM, TMUX, Git, and more.
 
 ---
 
@@ -21,7 +32,7 @@ The TI-CSC Toolbox is designed for researchers and engineers involved in Tempora
 
 ---
 
-### How to Run the Docker Image
+### How to Run the Docker Container
 
 1. **Ensure Docker is Installed:**
    - Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop) for macOS and Windows, or [Docker Engine](https://docs.docker.com/engine/install/) for Linux.
@@ -73,27 +84,6 @@ The TI-CSC Toolbox is designed for researchers and engineers involved in Tempora
   MATLAB Runtime may display warnings, but they generally do not affect the correctness of the output.
 
 ---
-
-### Container Contents
-
-The Docker container includes the following tools and libraries:
-
-- **FSL** 6.0.1
-- **Freesurfer** 7.1.1
-- **SimNIBS** 4.1.0
-- **MATLAB Runtime** r2024a
-- Git repository with analysis and optimization scripts
-- Commonly used CLI tools: VIM, NVIM, TMUX, Git, and more.
-
----
-
-### Project Functionality
-
-This CLI toolbox allows users to:
-
-1. **Optimize Montages for Temporal Interference Stimulation.**
-2. **Analyze and Visualize** unipolar and bipolar montages efficiently.
-   - *Note: While this is primarily a CLI tool, GUI visualization is available for simulation results.*
 
 #### Analyzer Requirements:
 
