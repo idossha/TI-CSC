@@ -39,12 +39,13 @@ elif [[ "$OS_TYPE" == "macOS" ]]; then
       -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
       idossha/ti-package:v1.0.4 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
   elif [[ "$PROC_TYPE" == "ARM" ]]; then
-    DISPLAY=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}'):0
+    #DISPLAY=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}'):0
+    DISPLAY=docker.for.mac.host.internal:0
     docker run --rm -ti \
       -e DISPLAY=$DISPLAY \
       -v /tmp/.X11-unix:/tmp/.X11-unix \
       -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-      idossha/ti-package:v1.0.4-arm bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+      idossha/ti-package:v1.0.4 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
   else
     echo "Unsupported processor type. Please enter 'Intel' or 'ARM'."
   fi
