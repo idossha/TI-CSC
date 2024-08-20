@@ -49,12 +49,13 @@ elif [[ "$OS_TYPE" == "macOS" ]]; then
     echo "Unsupported processor type. Please enter 'Intel' or 'ARM'."
   fi
 elif [[ "$OS_TYPE" == "Windows" ]]; then
+  echo "Make sure you have Xming running if you wish to use GUIs"
   echo "Enter the following command in your terminal:"
-  echo "docker run --rm -ti -v C:\path\to\prject_dir:/mnt/project_dir idossha/ti-package:v1.0.4"
+  echo "docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\prject_dir:/mnt/project_dir idossha/ti-package:v1.0.4"
 else
   echo "Unsupported OS type. Please enter 'Linux', 'macOS', or 'Windows'."
 fi
 
 # Revert X server access permissions
 xhost -local:root
-
+-e 

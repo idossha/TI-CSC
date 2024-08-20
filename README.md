@@ -4,7 +4,7 @@ last update: August 19, 2024
 
 ---
 
-Compatible with: Linux, Windows, macOS (intel)
+Compatible with: Linux, Windows, macOS
 Currently MATLAB Runtime and GUI functionality do not work on ARM architecture (Apple silicon). 
 Please ping if you encounter bugs.
 
