@@ -23,6 +23,7 @@ in the MathWorks Documentation Center.
 
 Files to Package for Standalone 
 ================================
+-process_mesh_files.ctf (component technology file)
 -process_mesh_files 
 -run_process_mesh_files.sh (shell script for temporarily setting environment variables 
                             and executing the application)
