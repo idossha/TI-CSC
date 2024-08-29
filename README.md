@@ -66,7 +66,7 @@ The Docker container includes the following tools and libraries:
      ```
    - On Windows, if you do not have bash available, run the following command manually:
      ```sh
-     docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\project_dir:/mnt/project_dir idossha/ti-package:vx.x.x
+     docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\project_dir:/mnt/project_dir -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" idossha/ti-package:vx.x.x
      ```
    - *Replace `C:\path\to\project_dir` with the actual path to your project directory on Windows.*
 

@@ -37,6 +37,7 @@
 
 ### Changed
 - Subject prompting process in optimizer 
+- User is not prompt to input project directory. Script does it automatically.
 
 ### Removed
 - debugging output from `sphere-analysis.sh`

@@ -58,7 +58,9 @@ elif [[ "$OS_TYPE" == "macOS" ]]; then
 elif [[ "$OS_TYPE" == "Windows" ]]; then
   echo "Make sure you have Xming running if you wish to use GUIs"
   echo "Enter the following command in your terminal:"
-  echo "docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -e PROJECT_DIR_NAME=\"$PROJECT_DIR_NAME\" -v C:\path\to\project_dir:/mnt/project_dir idossha/ti-package:v1.1.1"
+  echo "docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 \ "
+  echo "-e PROJECT_DIR_NAME=\"$PROJECT_DIR_NAME\"  -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \ "
+  echo " -v C:\path\to\project_dir:/mnt/project_dir idossha/ti-package:v1.1.1"
 else
   echo "Unsupported OS type. Please enter 'Linux', 'macOS', or 'Windows'."
 fi
