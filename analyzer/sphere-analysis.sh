@@ -7,19 +7,11 @@ simulation_dir="$2"
 shift 2
 selected_rois=("$@")
 
-# Debug: Print received arguments
-echo "Debug: subject_id=$subject_id"
-echo "Debug: simulation_dir=$simulation_dir"
-echo "Debug: selected_rois=${selected_rois[*]}"
-
 # Set the designated directory for NIfTI files
 nifti_dir="$simulation_dir/sim_${subject_id}/niftis"
-echo "Debug: nifti_dir=$nifti_dir"
 
 # Output directory setup
 output_dir="$simulation_dir/sim_${subject_id}/ROI_analysis"
-echo "Debug: output_dir=$output_dir"
-mkdir -p "$output_dir"
 
 # Load ROIs from JSON file
 roi_file="roi_list.json"

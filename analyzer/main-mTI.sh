@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -66,6 +65,17 @@ transform_gm_to_nifti() {
     echo "GM mesh to NIfTI transformation completed"
   }
 
+# Function to convert T1 to MNI space
+convert_t1_to_mni() {
+  local t1_file="$subject_dir/m2m_${subject_id}/T1.nii.gz"
+  local m2m_dir="$subject_dir/m2m_${subject_id}"
+  local output_file="$subject_dir/m2m_${subject_id}/T1_${subject_id}"
+  echo "Converting T1 to MNI space..."
+  subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
+  echo "T1 conversion to MNI completed: $output_file"
+}
+
+
 # Function to process mesh files
 process_mesh_files() {
     echo "Processing mesh files..."
@@ -124,6 +134,7 @@ for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
 done
 
 transform_gm_to_nifti
+convert_t1_to_mni
 process_mesh_files
 run_sphere_analysis
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
