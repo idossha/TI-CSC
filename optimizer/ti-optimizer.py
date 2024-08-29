@@ -53,12 +53,14 @@ intensity = get_intensity("Intensity of stimulation in mV: ")
 all_combinations = generate_combinations(E1_plus, E1_minus, E2_plus, E2_minus)
 
 # Load lead field
-leadfield_hdf = os.getenv('LEADFIELD_HDF')
+project_dir = os.getenv('PROJECT_DIR')
+subject_name = os.getenv('SUBJECT_NAME')
+eeg_cap = os.getenv('EEG_CAP', 'EGI_template')  # Default to 'EGI_template' if not set
+leadfield_dir = os.path.join(project_dir, f"Subjects/leadfield_vol_{subject_name}")
+leadfield_hdf = os.path.join(leadfield_dir, f"{subject_name}_leadfield_{eeg_cap}.hdf5")  # Construct the HDF5 file path
 leadfield, mesh, idx_lf = TI.load_leadfield(leadfield_hdf)
 
 # Set the output directory based on the project directory and subject name
-project_dir = os.getenv('PROJECT_DIR')
-subject_name = os.getenv('SUBJECT_NAME')
 output_dir = os.path.join(project_dir, f"Simulations/opt_{subject_name}")
 
 # Create output directory if it doesn't exist
