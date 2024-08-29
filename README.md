@@ -2,7 +2,7 @@
 # TI-CSC Toolbox for Docker Image
 
 **Developed and maintained by Ido Haber - [ihaber@wisc.edu](mailto:ihaber@wisc.edu)**  
-**Last update: August 20, 2024**
+**Last update: August 29, 2024**
 
 ---
 
