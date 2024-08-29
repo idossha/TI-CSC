@@ -3,9 +3,8 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
-# Prompt for project base directory with a default value
-read -p "Enter project directory (the default is /Users/idohaber/Desktop/strengthen): " project_dir
-project_dir=${project_dir:-/Users/idohaber/Desktop/strengthen}
+
+project_dir="/mnt/$PROJECT_DIR_NAME"
 subject_dir="$project_dir/Subjects"
 
 # Function to list available subjects

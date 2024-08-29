@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Allow local root access to X server
@@ -22,9 +23,10 @@ if [[ "$OS_TYPE" == "Linux" ]]; then
   docker run --rm -ti \
     -e DISPLAY=$DISPLAY \
     -e LIBGL_ALWAYS_SOFTWARE=1 \
+    -e PROJECT_DIR_NAME="$PROJECT_DIR_NAME" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-    idossha/ti-package:v1.1.0 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+    idossha/ti-package:v1.1.1 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 
 elif [[ "$OS_TYPE" == "macOS" ]]; then
   # Prompt for processor type if macOS
@@ -35,18 +37,19 @@ elif [[ "$OS_TYPE" == "macOS" ]]; then
     DISPLAY=host.docker.internal:0
     docker run --rm -ti \
       -e DISPLAY=$DISPLAY \
+      -e PROJECT_DIR_NAME="$PROJECT_DIR_NAME" \
       -v /tmp/.X11-unix:/tmp/.X11-unix \
       -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-      idossha/ti-package:v1.1.0 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+      idossha/ti-package:v1.1.1 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 
   elif [[ "$PROC_TYPE" == "ARM" ]]; then
-    #DISPLAY=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}'):0
     DISPLAY=docker.for.mac.host.internal:0
     docker run --rm -ti \
       -e DISPLAY=$DISPLAY \
+      -e PROJECT_DIR_NAME="$PROJECT_DIR_NAME" \
       -v /tmp/.X11-unix:/tmp/.X11-unix \
       -v "$LOCAL_PROJECT_DIR":/mnt/"$PROJECT_DIR_NAME" \
-      idossha/ti-package:v1.1.0 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
+      idossha/ti-package:v1.1.1 bash -c "echo 'Your project was mounted to /mnt/$PROJECT_DIR_NAME' && bash"
 
   else
     echo "Unsupported processor type. Please enter 'Intel' or 'ARM'."
@@ -55,11 +58,11 @@ elif [[ "$OS_TYPE" == "macOS" ]]; then
 elif [[ "$OS_TYPE" == "Windows" ]]; then
   echo "Make sure you have Xming running if you wish to use GUIs"
   echo "Enter the following command in your terminal:"
-  echo "docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -v C:\path\to\prject_dir:/mnt/project_dir idossha/ti-package:v1.1.0"
+  echo "docker run --rm -ti -e DISPLAY=host.docker.internal:0.0 -e PROJECT_DIR_NAME=\"$PROJECT_DIR_NAME\" -v C:\path\to\project_dir:/mnt/project_dir idossha/ti-package:v1.1.1"
 else
   echo "Unsupported OS type. Please enter 'Linux', 'macOS', or 'Windows'."
 fi
 
 # Revert X server access permissions
 xhost -local:root
--e
+
