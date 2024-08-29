@@ -149,6 +149,16 @@
         "E131",
         "E160"
       ]
+    ],
+    "Anterior_thalamus_May28": [
+      [
+        "E096",
+        "E076"
+      ],
+      [
+        "E222",
+        "E211"
+      ]
     ]
   },
   "multi_polar_montages": {
