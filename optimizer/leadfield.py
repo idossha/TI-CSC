@@ -1,6 +1,16 @@
 
 import os
 from simnibs import run_simnibs, sim_struct
+import sys
+
+# Ensure the correct number of arguments are provided
+if len(sys.argv) != 3:
+    print("Usage: leadfield.py <subject_directory> <eeg_cap_filename>")
+    sys.exit(1)
+
+# Get the subject path and EEG cap filename from command line arguments
+subject_ID = sys.argv[1]
+eeg_cap = sys.argv[2]
 
 # Function to create the leadfield matrix
 def create_leadfield(subject_ID, eeg_cap, interpolation=None, tissues=None, suffix=''):
@@ -37,13 +47,12 @@ def create_leadfield(subject_ID, eeg_cap, interpolation=None, tissues=None, suff
     # Run the simulation
     run_simnibs(tdcs_lf)
 
-# User input for subject ID and EEG cap
-subject_ID = input("Enter the full path to the m2m_subjectID directory (e.g., '/Users/idohaber/Desktop/strengthen/Subjects/m2m_101'): ")
-eeg_cap = input("Enter the EEG cap filename (e.g., 'EGI_template.csv'): ")
+# Full path to the m2m_subjectID directory
+subject_path = subject_ID
 
 # Create the volumetric leadfield
 create_leadfield(
-    subject_ID=subject_ID,
+    subject_ID=subject_path,
     eeg_cap=eeg_cap,
     interpolation=None,  # No interpolation for volumetric data
     tissues=list(range(1, 16)),  # All tissues
@@ -52,7 +61,7 @@ create_leadfield(
 
 # Create the GM surface leadfield
 create_leadfield(
-    subject_ID=subject_ID,
+    subject_ID=subject_path,
     eeg_cap=eeg_cap,
     interpolation='middle gm',  # Interpolation for the GM surface
     tissues=None,  # No tissue list for surface data
