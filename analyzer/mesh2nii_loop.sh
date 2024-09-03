@@ -2,8 +2,6 @@
 #!/bin/bash
 
 
-#!/bin/bash
-
 ##############################################
 # Ido Haber - ihaber@wisc.edu
 # September 2, 2024

@@ -1,26 +1,25 @@
 #!/bin/bash
 
+###########################################
 
-##############################################
-# Ido Haber - ihaber@wisc.edu
+# Ido Haber / ihaber@wisc.edu
 # September 2, 2024
-# Optimized for TI-CSC toolbox
-#
-# This bash script is the primary driver for setting up and executing 
-# simulations and analyses within the analyzer pipeline. It guides the 
-# user through the selection of subjects, simulation types, electrode 
-# montages, and Regions of Interest (ROIs). The script also allows for 
-# the addition of new montages and ROIs, updating configuration files 
-# as needed.
-#
-# Key Features:
-# - Allows selection of subjects and simulation types (isotropic or anisotropic).
-# - Supports both unipolar and multipolar montages with options to add new montages.
-# - Validates user input for ROI coordinates and electrode pairs.
-# - Manages simulation execution through dedicated main pipeline scripts.
-# - Provides the ability to add new ROIs and update the JSON configuration files.
-# - Ensures all tasks are completed with proper validation and error handling.
-##############################################
+# optimizer for TI-CSC analyzer
+
+# This script is used to run a simulation pipeline for a given subject. 
+
+# Arguments:
+#   - No direct arguments; the script prompts the user for all necessary inputs.
+
+# Dependencies:
+#   - jq: For processing JSON files.
+#   - FSL or other tools for working with NIfTI files, depending on the content of the simulation scripts.
+
+# Note:
+#   - Ensure that the `utils` directory contains the JSON files or that the script has permission to create them.
+#   - This script assumes the working environment has the necessary tools installed and available in the system's PATH.
+###########################################
+
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
@@ -44,10 +43,37 @@ validate_pair() {
     return 0
 }
 
-# Set project base directory to the mounted path
-project_base="/mnt/$PROJECT_DIR_NAME"
+# Prompt for project base directory with a default value
+read -p "Enter the base directory of the project (/mnt/your_project_dir_name): " project_base
+project_base=${project_base:-/Users/idohaber/Desktop/strengthen}
 subject_dir="$project_base/Subjects"
 simulation_dir="$project_base/Simulations"
+utils_dir="$project_base/utils/"
+
+# Ensure montage_list.json exists
+montage_file="$utils_dir/montage_list.json"
+if [ ! -f "$montage_file" ]; then
+    cat <<EOL > "$montage_file"
+{
+  "uni_polar_montages": {},
+  "multi_polar_montages": {}
+}
+EOL
+    echo "Created and initialized $montage_file."
+    new_montage_added=true
+fi
+
+# Ensure roi_list.json exists
+roi_file="$utils_dir/roi_list.json"
+if [ ! -f "$roi_file" ]; then
+    cat <<EOL > "$roi_file"
+{
+  "ROIs": {}
+}
+EOL
+    echo "Created and initialized $roi_file."
+    new_roi_added=true
+fi
 
 # List available subjects based on the project directory input
 list_subjects() {
@@ -133,7 +159,7 @@ fi
 prompt_montages() {
     while true; do
         # Load montages from JSON file using jq
-        montages=$(jq -r ".${montage_type} | keys[]" montage_list.json)
+        montages=$(jq -r ".${montage_type} | keys[]" "$montage_file")
 
         echo "Available montages:"
         montage_array=($montages)
@@ -143,7 +169,7 @@ prompt_montages() {
             left="${montage_array[$i]}"
             right="${montage_array[$((i + half_count))]}"
             printf "%2d. %-20s" $((i + 1)) "$left"
-            if [ -n "$right" ]; then
+            if [ -n "$right" ];then
                 printf "%2d. %s" $((i + 1 + half_count)) "$right"
             fi
             printf "\n"
@@ -159,50 +185,50 @@ prompt_montages() {
         new_montage_added=false
 
         for number in "${selected_numbers[@]}"; do
-            if [ "$number" -eq "$(( ${#montage_array[@]} + 1 ))" ]; then
+            if [ "$number" -eq "$(( ${#montage_array[@]} + 1 ))" ];then
                 read -p "Enter a name for the new montage: " new_montage_name
-                if [ "$sim_mode" == "U" ]; then
+                if [ "$sim_mode" == "U" ];then
                     valid=false
-                    until $valid; do
+                    until $valid;do
                         read -p "Enter Pair 1 (format: E1,E2): " pair1
                         validate_pair "$pair1" && valid=true
                     done
                     valid=false
-                    until $valid; do
+                    until $valid;do
                         read -p "Enter Pair 2 (format: E1,E2): " pair2
                         validate_pair "$pair2" && valid=true
                     done
                     new_montage=$(jq -n --arg name "$new_montage_name" --argjson pairs "[[\"${pair1//,/\",\"}\"], [\"${pair2//,/\",\"}\"]]" '{($name): $pairs}')
-                    jq ".${montage_type} += $new_montage" montage_list.json > temp.json && mv temp.json montage_list.json
-                elif [ "$sim_mode" == "M" ]; then
+                    jq ".${montage_type} += $new_montage" "$montage_file" > temp.json && mv temp.json "$montage_file"
+                elif [ "$sim_mode" == "M" ];then
                     valid=false
-                    until $valid; do
+                    until $valid;do
                         read -p "Enter Pair 1a (format: E1,E2): " pair1a
                         validate_pair "$pair1a" && valid=true
                     done
                     valid=false
-                    until $valid; do
+                    until $valid;do
                         read -p "Enter Pair 2a (format: E1,E2): " pair2a
                         validate_pair "$pair2a" && valid=true
                     done
                     valid=false
-                    until $valid; do
+                    until $valid;do
                         read -p "Enter Pair 1b (format: E1,E2): " pair1b
                         validate_pair "$pair1b" && valid=true
                     done
                     valid=false
-                    until $valid; do
+                    until $valid;do
                         read -p "Enter Pair 2b (format: E1,E2): " pair2b
                         validate_pair "$pair2b" && valid=true
                     done
                     new_montage=$(jq -n --arg name "$new_montage_name" --argjson pairs_a "[[\"${pair1a//,/\",\"}\"], [\"${pair2a//,/\",\"}\"]]" --argjson pairs_b "[[\"${pair1b//,/\",\"}\"], [\"${pair2b//,/\",\"}\"]]" '{($name + "_1"): $pairs_a, ($name + "_2"): $pairs_b}')
-                    jq ".${montage_type} += $new_montage" montage_list.json > temp.json && mv temp.json montage_list.json
+                    jq ".${montage_type} += $new_montage" "$montage_file" > temp.json && mv temp.json "$montage_file"
                 fi
                 new_montage_added=true
                 break  # Re-prompt the user with the updated montage list
             else
                 selected_montage=$(echo "$montages" | sed -n "${number}p")
-                if [ -n "$selected_montage" ]; then
+                if [ -n "$selected_montage" ];then
                     selected_montages+=("$selected_montage")
                 else
                     echo "Invalid montage number: $number. Exiting."
@@ -211,7 +237,7 @@ prompt_montages() {
             fi
         done
 
-        if ! $new_montage_added; then
+        if ! $new_montage_added;then
             break  # Exit the loop if no new montage was added
         fi
     done
@@ -219,14 +245,13 @@ prompt_montages() {
 
 # Function to prompt and select ROIs
 prompt_rois() {
-    while true; do
+    while true;do
         # Load ROIs from JSON file
-        roi_file="roi_list.json"
         rois=$(jq -r '.ROIs | keys[]' "$roi_file")
 
         echo "Available ROIs:"
         roi_array=($rois)
-        for (( i=0; i<${#roi_array[@]}; i++ )); do
+        for (( i=0; i<${#roi_array[@]}; i++ ));do
             echo "$((i+1)). ${roi_array[$i]}"
         done
 
@@ -238,11 +263,11 @@ prompt_rois() {
         selected_roi_names=()
         new_roi_added=false
 
-        for roi in "${selected_rois[@]}"; do
-            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ]; then
+        for roi in "${selected_rois[@]}";do
+            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ];then
                 read -p "Enter new ROI name: " new_roi_name
                 valid=false
-                until $valid; do
+                until $valid;do
                     read -p "Enter Voxel Coordinates (format: X Y Z): " new_coordinates
                     validate_coordinates "$new_coordinates" && valid=true
                 done
@@ -251,7 +276,7 @@ prompt_rois() {
                 break  # Re-prompt the user with the updated ROI list
             else
                 roi_name=$(echo "$rois" | sed -n "${roi}p")
-                if [ -n "$roi_name" ]; then
+                if [ -n "$roi_name" ];then
                     selected_roi_names+=("$roi_name")
                 else
                     echo "Invalid ROI number: $roi. Exiting."
@@ -260,7 +285,7 @@ prompt_rois() {
             fi
         done
 
-        if ! $new_roi_added; then
+        if ! $new_roi_added;then
             break  # Exit the loop if no new ROI was added
         fi
     done
@@ -273,7 +298,7 @@ prompt_montages
 prompt_rois
 
 # Loop through selected subjects and run the pipeline
-for subject_index in "${selected_subjects[@]}"; do
+for subject_index in "${selected_subjects[@]}";do
     subject_id="${subjects[$((subject_index-1))]}"
 
     # Call the appropriate main pipeline script with the gathered parameters
@@ -283,11 +308,11 @@ for subject_index in "${selected_subjects[@]}"; do
     ./sphere-analysis.sh "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
 done
 
-if $new_montage_added; then
+if $new_montage_added;then
     echo "New montage added to montage_list.json."
 fi
 
-if $new_roi_added; then
+if $new_roi_added;then
     echo "New ROI added to roi_list.json."
 fi
 

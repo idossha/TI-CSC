@@ -1,22 +1,30 @@
 
 #!/bin/bash
 
-##############################################
-# Ido Haber - ihaber@wisc.edu
+###########################################
+
+# Ido Haber / ihaber@wisc.edu
 # September 2, 2024
-# Optimized for TI-CSC toolbox
-#
-# This script performs ROI-based analysis on NIfTI volumes generated from simulations.
-# It calculates the mean and maximum values within spherical regions of interest (ROIs) 
-# for specified voxel coordinates and generates a summary report. 
-# Additionally, it computes differential mean values between selected ROIs.
-#
-# Key Features:
-# - Supports multiple ROIs and NIfTI volumes in batch processing.
-# - Creates spherical masks around specified voxel coordinates and extracts mean and max values.
-# - Outputs the calculated mean, max, and differential values into a text file.
-# - Handles the cleanup of temporary files generated during the process.
-##############################################
+# optimizer for TI-CSC analyzer
+
+# This script performs region of interest (ROI) analysis on NIfTI files for a specific subject.
+# It uses spherical masks to extract mean and maximum values from the selected ROIs
+# and calculates differential mean values between ROIs across different NIfTI volumes.
+# The results are saved in a text file within the designated output directory.
+
+# Arguments:
+#   1. subject_id        : The ID of the subject.
+#   2. simulation_dir    : The base directory where simulation results are stored.
+#   3. selected_rois     : A list of ROIs to analyze.
+
+# Output:
+#   - A text file containing the voxel coordinates, mean, and max values for the selected ROIs.
+#   - Differential mean values between the selected ROIs.
+
+# Note:
+#   The script expects the 'roi_list.json' file to be located in the ../utils directory relative to the simulation directory.
+#   It uses FSL tools to perform the analysis, so ensure FSL is installed and configured properly in the environment.
+###########################################
 
 # Get the subject ID and simulation directory from the command-line arguments
 subject_id="$1"
@@ -30,8 +38,8 @@ nifti_dir="$simulation_dir/sim_${subject_id}/niftis"
 # Output directory setup
 output_dir="$simulation_dir/sim_${subject_id}/ROI_analysis"
 
-# Load ROIs from JSON file
-roi_file="roi_list.json"
+# Define the correct path for the ROI JSON file
+roi_file="${simulation_dir}/../utils/roi_list.json"
 
 # Radius for the spherical region (in voxels)
 radius=3

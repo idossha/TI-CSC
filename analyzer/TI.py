@@ -6,24 +6,28 @@ import numpy as np
 from simnibs import mesh_io, run_simnibs, sim_struct
 from simnibs.utils import TI_utils as TI
 
+###########################################
 
+# Ido Haber / ihaber@wisc.edu
+# September 2, 2024
+# optimizer for TI-CSC analyzer
 
-'''
-Ido Haber - ihaber@wisc.edu
-September 2, 2024
-Optimized for analyzer pipeline
+# This script runs SimNIBS simulations
 
-This script handles the setup and execution of Temporal Interference (TI) simulations for a given subject. 
-It automates the selection and configuration of electrode montages based on user input and 
-executes the simulations using SimNIBS. The script supports both uni-polar and multi-polar montages 
-and integrates anisotropy data from DTI (Diffusion Tensor Imaging) scans.
+# Arguments:
+#   1. subject_id        : The ID of the subject.
+#   2. sim_type          : The type of simulation anisotropy ('scalar', 'vn', 'dir', 'mc').
+#   3. subject_dir       : The directory where subject-specific data is stored.
+#   4. simulation_dir    : The directory where simulation results will be saved.
+#   5. montage_names     : A list of montage names to use for the simulation.
 
-Key Features:
-- Loads and selects montages from a predefined JSON configuration file.
-- Configures and runs simulations with different electrode pairs.
-- Generates mesh files and computes TI fields for each montage.
-- Saves simulation outputs in standardized directories and formats.
-'''
+# Functionality:
+#   - Loads the selected montages from a JSON file located in the ../utils directory relative to the subject directory.
+#   - Runs the simulation for each montage and saves the resulting mesh files.
+#   - Calculates and stores the maximal amplitude of the temporal interference (TI) envelope for multi-polar montages.
+
+###########################################
+
 
 
 # Get subject ID, simulation type, and montages from command-line arguments
@@ -33,8 +37,12 @@ subject_dir = sys.argv[3]
 simulation_dir = sys.argv[4]
 montage_names = sys.argv[5:]  # The list of montages
 
+# Define the correct path for the JSON file
+utils_dir = os.path.join(subject_dir, '..', 'utils')
+montage_file = os.path.join(utils_dir, 'montage_list.json')
+
 # Load montages from JSON file
-with open('montage_list.json') as f:
+with open(montage_file) as f:
     all_montages = json.load(f)
 
 # Create the montages dictionary based on the selected montages
