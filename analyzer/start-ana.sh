@@ -43,9 +43,8 @@ validate_pair() {
     return 0
 }
 
-# Prompt for project base directory with a default value
-read -p "Enter the base directory of the project (/mnt/your_project_dir_name): " project_base
-project_base=${project_base:-/Users/idohaber/Desktop/strengthen}
+
+project_base="/mnt/$PROJECT_DIR_NAME"
 subject_dir="$project_base/Subjects"
 simulation_dir="$project_base/Simulations"
 utils_dir="$project_base/utils/"
