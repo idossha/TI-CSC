@@ -135,4 +135,4 @@ else
         xline(cutoff_value, 'r', [' ' num2str(cutoff) '%']);
     end
     hold off;
-e
+end

@@ -1,21 +1,21 @@
 #!/bin/bash
 # Function to find MATLAB Runtime
 find_matlab_runtime() {
-  local potential_paths=(
-    "/usr/local/MATLAB/MATLAB_Runtime/R2024a"
-    "/usr/local/MATLAB/MATLAB_Runtime/v951"
-    "/opt/MATLAB/MATLAB_Runtime/R2024a"
-    "/home/$USER/MATLAB_Runtime/R2024a"
-  )
+    local potential_paths=(
+        "/usr/local/MATLAB/MATLAB_Runtime/R2024a"
+        "/usr/local/MATLAB/MATLAB_Runtime/v951"
+        "/opt/MATLAB/MATLAB_Runtime/R2024a"
+        "/home/$USER/MATLAB_Runtime/R2024a"
+    )
 
-  for path in "${potential_paths[@]}"; do
-    if [ -d "$path" ]; then
-      echo "$path"
-      return 0
-    fi
-  done
-  echo "MATLAB Runtime not found. Please install it or update the script with the correct path."
-  exit 1
+    for path in "${potential_paths[@]}"; do
+        if [ -d "$path" ]; then
+            echo "$path"
+            return 0
+        fi
+    done
+    echo "MATLAB Runtime not found. Please install it or update the script with the correct path."
+    exit 1
 }
 
 exe_name=$0
@@ -38,8 +38,8 @@ echo "--------------------------------------"
 
 # Create a symlink if the exact version of the library is missing
 if [ ! -f "${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1" ]; then
-  echo "libmwmclmcrrt.so.25.1 not found. Attempting to create a symlink to libmwmclmcrrt.so.24.1"
-  ln -s ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.24.1 ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1
+    echo "libmwmclmcrrt.so.25.1 not found. Attempting to create a symlink to libmwmclmcrrt.so.24.1"
+    ln -s ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.24.1 ${MCROOT}/runtime/glnxa64/libmwmclmcrrt.so.25.1
 fi
 
 mesh_dir=$1
