@@ -3,6 +3,28 @@ import os
 from simnibs import run_simnibs, sim_struct
 import sys
 
+
+'''
+Ido Haber - ihaber@wisc.edu
+September 2, 2024
+Optimized for optimizer pipeline
+
+This script is designed to create leadfield matrices for Temporal Interference (TI) simulations, 
+which are based on two different leadfield configurations:
+
+1. Volumetric Leadfield: 
+   - Used for calculating TI_max.
+   - Creates a volumetric leadfield matrix that includes all tissues.
+
+2. Surface Leadfield:
+   - Used for calculating TI_localnorm.
+   - Creates a leadfield matrix specifically for the GM (gray matter) surface.
+
+The script exports all configurations based on the provided input EEG cap and subject directory.
+'''
+
+
+
 # Ensure the correct number of arguments are provided
 if len(sys.argv) != 3:
     print("Usage: leadfield.py <subject_directory> <eeg_cap_filename>")

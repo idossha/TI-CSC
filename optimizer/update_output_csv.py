@@ -1,7 +1,22 @@
-
 import pandas as pd
 import sys
 import re
+
+'''
+Ido Haber - ihaber@wisc.edu
+September 2, 2024
+Optimized for optimizer pipeline
+
+This script updates the output CSV file by merging data from the summary CSV.
+It extracts specific metrics related to TI simulations and maps them to the 
+corresponding mesh names in the output CSV.
+
+Key Features:
+- Maps mesh names from the summary CSV to the format used in the output CSV.
+- Extracts specific percentile and focality metrics for inclusion in the output.
+- Merges the data based on mesh names and updates the output CSV file.
+'''
+
 
 def map_mesh_names(mesh_name):
     # Convert output.csv mesh name to summary.csv mesh name format
@@ -27,7 +42,7 @@ def update_output_csv(project_dir, subject_name):
         sys.exit(1)
     
     # Extract the necessary columns and map FileName
-    summary_df['Mesh'] = summary_df['FileName'].apply(lambda x: re.sub(r"TI_field_(.*?)\.msh", r"\1", x).replace("_and_", " <> "))
+    summary_df['Mesh'] = summary_df['FileName'].apply(lambda x: re.sub(r"TI_max_norm_(.*?)\.msh", r"\1", x).replace("_and_", " <> "))
     extracted_df = summary_df[['Mesh'] + columns_to_extract]
     
     # Load the output CSV

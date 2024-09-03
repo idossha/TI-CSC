@@ -72,7 +72,7 @@ function varargout = mesh_get_fieldpeaks_and_focality(m, varargin)
 % A. Thielscher 07-Sep-2018
 
 % standard settings and behavior
-s.field_idx = 'TI_max';
+s.field_idx = 'TImax';
 s.region_idx = 2;
 s.datatype = 'tet';
 s.percentiles=[95 99 99.9];

@@ -1,6 +1,28 @@
 
 #!/bin/bash
 
+
+#!/bin/bash
+
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for optimizer pipeline
+#
+# This script orchestrates the full pipeline for Temporal Interference (TI) simulations
+# using SimNIBS and other related tools. It handles directory setup, simulation execution,
+# mesh processing, GM extraction, NIfTI transformation, and other key tasks.
+#
+# Key Features:
+# - Manages the execution of TI simulations based on selected montages.
+# - Extracts and processes Grey Matter (GM) meshes.
+# - Transforms GM meshes to NIfTI format in MNI space.
+# - Converts T1-weighted MRI to MNI space.
+# - Executes additional analyses, such as sphere-based ROI analysis.
+# - Supports multiple simulation types, including isotropic and anisotropic conductivity.
+#
+##############################################
+
 set -e # Exit immediately if a command exits with a non-zero status
 
 # Gather arguments from the prompter script

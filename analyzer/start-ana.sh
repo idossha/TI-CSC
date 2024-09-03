@@ -1,5 +1,26 @@
-
 #!/bin/bash
+
+
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for TI-CSC toolbox
+#
+# This bash script is the primary driver for setting up and executing 
+# simulations and analyses within the analyzer pipeline. It guides the 
+# user through the selection of subjects, simulation types, electrode 
+# montages, and Regions of Interest (ROIs). The script also allows for 
+# the addition of new montages and ROIs, updating configuration files 
+# as needed.
+#
+# Key Features:
+# - Allows selection of subjects and simulation types (isotropic or anisotropic).
+# - Supports both unipolar and multipolar montages with options to add new montages.
+# - Validates user input for ROI coordinates and electrode pairs.
+# - Manages simulation execution through dedicated main pipeline scripts.
+# - Provides the ability to add new ROIs and update the JSON configuration files.
+# - Ensures all tasks are completed with proper validation and error handling.
+##############################################
 
 set -e  # Exit immediately if a command exits with a non-zero status
 

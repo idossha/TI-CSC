@@ -1,6 +1,25 @@
 
 #!/bin/bash
 
+
+#!/bin/bash
+
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for optimizer pipeline
+#
+# This script is designed to convert Grey Matter (GM) mesh files (.msh) to NIfTI format 
+# using a subject's T1-weighted MRI as a reference. It ensures the anatomical accuracy 
+# of simulations by aligning the mesh with the subject's brain anatomy in MNI space.
+#
+# Key Features:
+# - Converts GM mesh files to NIfTI format using the subject2mni tool.
+# - Validates input directories and files to ensure smooth execution.
+# - Automatically creates an output directory for the resulting NIfTI files.
+# - Provides detailed error handling for common issues like missing files or directories.
+##############################################
+
 # Get the subject ID, subject directory, and simulation directory from the command-line arguments
 subject_id="$1"
 subject_dir="$2"

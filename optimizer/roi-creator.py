@@ -1,12 +1,30 @@
 
 import os
 import csv
+import sys
+import subprocess
 
-def create_directory(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+
+'''
+Ido Haber - ihaber@wisc.edu
+September 2, 2024
+Optimized for optimizer pipeline
+
+This script manages the creation and modification of Regions of Interest (ROIs) for simulations. 
+It allows users to select existing ROIs or add new ones, with the option to visualize the 
+subject's T1-weighted MRI in Freeview before specifying ROI coordinates.
+
+Key Features:
+- Lists existing ROIs and provides an option to modify or add new ones.
+- Invokes Freeview for visual reference when adding new ROIs.
+- Saves ROI coordinates to a CSV file and maintains a list of all ROI files.
+- Handles file permissions and directory creation as needed.
+'''
+
 
 def save_roi_to_csv(roi_name, coordinates, directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     file_path = os.path.join(directory, f"{roi_name}.csv")
     with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -27,31 +45,44 @@ def read_roi_coordinates(roi_name, directory):
         with open(file_path, mode='r') as file:
             reader = csv.reader(file)
             coordinates = next(reader)
-            coordinates = [float(coord) for coord in coordinates]
+            coordinates = [float(coord.strip()) for coord in coordinates]
             return coordinates
     return []
 
+def call_view_nifti(roi_directory):
+    # Assuming the script is in the same directory, you may need to adjust this path
+    view_nifti_script = os.path.join(os.path.dirname(__file__), "view-nifti.sh")
+
+    # Ensure the script has execute permissions
+    subprocess.call(['chmod', '+x', view_nifti_script])
+
+    # Extract project directory and subject name
+    subject_name = os.path.basename(os.path.dirname(roi_directory)).replace('m2m_', '')
+    project_dir = os.path.dirname(os.path.dirname(roi_directory))
+    
+    subprocess.call([view_nifti_script, project_dir, subject_name])
+
 def main():
-    # Create the directory for saving ROIs if it does not exist
-    roi_directory = 'ROIs'
-    create_directory(roi_directory)
+    # Check if the ROI directory is passed as an argument
+    if len(sys.argv) < 2:
+        print("Error: ROI directory path is required as an argument.")
+        sys.exit(1)
+
+    roi_directory = sys.argv[1]
     
     # List to store the paths of generated CSV files
     roi_files = []
     
-    # Get the number of ROIs to create or modify
-    num_rois = int(input("How many ROIs to create/modify? "))
-    
     # List existing ROIs
     existing_rois = list_existing_rois(roi_directory)
     
-    # Display existing ROIs
-    print("Existing ROIs:")
-    for idx, roi in enumerate(existing_rois, start=1):
-        print(f"{idx}. {roi}")
-    print(f"{len(existing_rois) + 1}. Add new ROI")
-    
-    for i in range(1, num_rois + 1):
+    if existing_rois:
+        # Display existing ROIs and option to add a new one
+        print("Existing ROIs:")
+        for idx, roi in enumerate(existing_rois, start=1):
+            print(f"{idx}. {roi}")
+        print(f"{len(existing_rois) + 1}. Add new ROI")
+        
         while True:
             choice = int(input(f"Select an ROI to modify (1-{len(existing_rois) + 1}): "))
             if 1 <= choice <= len(existing_rois) + 1:
@@ -60,12 +91,9 @@ def main():
                 print("Invalid choice. Please try again.")
         
         if choice == len(existing_rois) + 1:
-            while True:
-                roi_name = input(f"Name of new ROI {i}: ")
-                if " " in roi_name:
-                    print("The name must be a single word. Please try again.")
-                else:
-                    break
+            # Call view-nifti.sh before adding a new ROI
+            call_view_nifti(roi_directory)
+            roi_name = input("Name of new ROI: ")
             coordinates = []
         else:
             roi_name = existing_rois[choice - 1]
@@ -73,23 +101,29 @@ def main():
             print(f"Current coordinates for '{roi_name}': {coordinates}")
         
         if not coordinates:
-            while True:
-                coordinates = input(f"Coordinates for ROI '{roi_name}' (x y z): ").split()
-                if len(coordinates) != 3 or not all(coord.replace('.', '', 1).replace('-', '', 1).isdigit() for coord in coordinates):
-                    print("Please enter exactly three numbers separated by spaces. Example: -10.5 5 20.0")
-                else:
-                    coordinates = [float(coord) for coord in coordinates]
-                    break
+            coordinates = input(f"Enter RAS coordinates for ROI '{roi_name}' (x y z): ").split(',')
+            coordinates = [float(coord.strip()) for coord in coordinates]
         
-        roi_file = save_roi_to_csv(roi_name, coordinates, roi_directory)
-        roi_files.append(roi_file)
+    else:
+        # No existing ROIs, so call view-nifti.sh and then prompt to add a new one
+        call_view_nifti(roi_directory)
+        roi_name = input("Name of new ROI: ")
+        coordinates = input(f"Enter RAS coordinates for ROI '{roi_name}' (x y z): ").split(',')
+        coordinates = [float(coord.strip()) for coord in coordinates]
+    
+    # Save the ROI to a CSV file
+    roi_file = save_roi_to_csv(roi_name, coordinates, roi_directory)
+    roi_files.append(roi_file)
     
     # Write the list of ROI files to a text file
-    with open('roi_list.txt', 'w') as file:
+    roi_list_path = os.path.join(roi_directory, 'roi_list.txt')
+    with open(roi_list_path, 'w') as file:
         for roi_file in roi_files:
             file.write(f"{roi_file}\n")
     
-    print(f"All ROIs have been saved in the '{roi_directory}' directory.")
+    print(f"ROI '{roi_name}' has been saved in the '{roi_directory}' directory.")
+    # End the script after processing the single ROI
+    return
 
 if __name__ == "__main__":
     main()

@@ -47,8 +47,7 @@ function process_mesh_files_new(mesh_dir)
             s.focality_values(1) / 1000, s.focality_values(2) / 1000, s.focality_values(3) / 1000, s.focality_values(4) / 1000, ...
             mat2str(s.XYZ_max), ...
             mat2str(s.XYZ_perc(1,:)), mat2str(s.XYZ_perc(2,:)), mat2str(s.XYZ_perc(3,:)), ...
-            mat2str(s.XYZstd_perc(1,:)), mat2str(s.XYZstd_perc(2,:)), mat2str(s.XYZstd_perc(3,:))};
-        
+            mat2str(s.XYZstd_perc(1,:)), mat2str(s.XYZstd_perc(2,:)), mat2str(s.XYZstd_perc(3,:))};        
         csv_data = [csv_data; csv_row];
     end
 

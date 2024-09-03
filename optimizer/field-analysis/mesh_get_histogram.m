@@ -41,7 +41,7 @@ function varargout = mesh_get_histogram(m, varargin)
 % A. Thielscher 07-Sep-2018
 
 % standard settings and behavior
-s.field_idx = 'TI_max';
+s.field_idx = 'TImax';
 s.region_idx = 2;
 s.relscale = false;
 s.scaleLimits = [];
@@ -135,4 +135,4 @@ else
         xline(cutoff_value, 'r', [' ' num2str(cutoff) '%']);
     end
     hold off;
-end
+e

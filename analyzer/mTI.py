@@ -7,6 +7,25 @@ import numpy as np
 from simnibs import mesh_io, run_simnibs, sim_struct
 from simnibs.utils import TI_utils as TI
 
+
+'''
+Ido Haber - ihaber@wisc.edu
+September 2, 2024
+Optimized for optimizer pipeline
+
+This script manages the execution of simulations for Temporal Interference (TI) using specified montages.
+It loads predefined montages from a JSON file, runs simulations for each montage using the SimNIBS framework,
+and calculates the TI vectors. Additionally, it pairs up montages to perform multipolar TI (mTI) calculations 
+by combining the results of the individual montages.
+
+Key Features:
+- Runs TI simulations for both unipolar and multipolar montages.
+- Generates TI vector fields and calculates the maximal TI amplitude.
+- Supports both isotropic and anisotropic simulations based on user input.
+- Outputs the results as mesh files (.msh) with associated TI fields for visualization.
+'''
+
+
 # Get subject ID, simulation type, and montages from command-line arguments
 subject_id = sys.argv[1]
 sim_type = sys.argv[2]  # The anisotropy type

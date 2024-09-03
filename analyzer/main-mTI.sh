@@ -1,5 +1,27 @@
 #!/bin/bash
 
+
+#!/bin/bash
+
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for optimizer pipeline
+#
+# This script orchestrates the full workflow for Multi-Polar Temporal Interference (mTI) simulations 
+# using SimNIBS and other related tools. It handles the entire process from simulation execution 
+# to mesh processing, Grey Matter (GM) extraction, and NIfTI conversion. It includes safeguards to 
+# ensure that each step completes successfully and allows for easy debugging.
+#
+# Key Features:
+# - Runs mTI simulations based on selected montages.
+# - Extracts and processes GM meshes, converting them to NIfTI format in MNI space.
+# - Converts T1-weighted MRI to MNI space for accurate anatomical reference.
+# - Provides mechanisms to handle errors at each stage of the pipeline.
+# - Supports the generation of screenshots for visual inspection of results.
+#
+##############################################
+
 set -e  # Exit immediately if a command exits with a non-zero status
 
 # Gather arguments from the prompter script

@@ -1,5 +1,3 @@
-
-
 import os
 import sys
 import json
@@ -7,6 +5,26 @@ from copy import deepcopy
 import numpy as np
 from simnibs import mesh_io, run_simnibs, sim_struct
 from simnibs.utils import TI_utils as TI
+
+
+
+'''
+Ido Haber - ihaber@wisc.edu
+September 2, 2024
+Optimized for analyzer pipeline
+
+This script handles the setup and execution of Temporal Interference (TI) simulations for a given subject. 
+It automates the selection and configuration of electrode montages based on user input and 
+executes the simulations using SimNIBS. The script supports both uni-polar and multi-polar montages 
+and integrates anisotropy data from DTI (Diffusion Tensor Imaging) scans.
+
+Key Features:
+- Loads and selects montages from a predefined JSON configuration file.
+- Configures and runs simulations with different electrode pairs.
+- Generates mesh files and computes TI fields for each montage.
+- Saves simulation outputs in standardized directories and formats.
+'''
+
 
 # Get subject ID, simulation type, and montages from command-line arguments
 subject_id = sys.argv[1]

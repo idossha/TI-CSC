@@ -1,6 +1,17 @@
 
 #!/bin/bash
 
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for TI-CSC toolbox
+#
+# This script helps create spherical regions of interest (ROIs) with a specified radius 
+# as NIfTI files for visualization purposes. The spheres are based on voxel coordinates 
+# from an input NIfTI volume. The script combines these spheres into a single ROI volume 
+# for easier visualization and overlays it on the original volume using Freeview.
+##############################################
+
 # Directory setup
 output_dir="../analyzer/base-niftis/"
 mkdir -p $output_dir

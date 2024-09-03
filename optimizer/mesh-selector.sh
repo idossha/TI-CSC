@@ -1,5 +1,19 @@
+#!/bin/bash
 
-# Get the project directory and subject name from environment variables
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for optimizer pipeline
+#
+# This script helps the user maintain a clean project directory 
+# by allowing selective retention of .msh files and removing unwanted files 
+# to reduce clutter.
+#
+# It prompts the user to select specific .msh files for simulation, 
+# and optionally deletes the remaining .msh files and all .opt files.
+##############################################
+
+
 project_dir=$PROJECT_DIR
 subject_name=$SUBJECT_NAME
 

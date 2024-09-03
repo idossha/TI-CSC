@@ -1,6 +1,23 @@
 
 #!/bin/bash
 
+##############################################
+# Ido Haber - ihaber@wisc.edu
+# September 2, 2024
+# Optimized for TI-CSC toolbox
+#
+# This script performs ROI-based analysis on NIfTI volumes generated from simulations.
+# It calculates the mean and maximum values within spherical regions of interest (ROIs) 
+# for specified voxel coordinates and generates a summary report. 
+# Additionally, it computes differential mean values between selected ROIs.
+#
+# Key Features:
+# - Supports multiple ROIs and NIfTI volumes in batch processing.
+# - Creates spherical masks around specified voxel coordinates and extracts mean and max values.
+# - Outputs the calculated mean, max, and differential values into a text file.
+# - Handles the cleanup of temporary files generated during the process.
+##############################################
+
 # Get the subject ID and simulation directory from the command-line arguments
 subject_id="$1"
 simulation_dir="$2"
