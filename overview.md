@@ -6,8 +6,9 @@ TI-CSC/               <project_dir>/
 ├── analyzer/         │   ├── m2m_<subject_id>/
 ├── optimizer/        │   └── leadfield_<subject_id>/
 └── README.md         └── Simulations/
-                          ├── sim_<subject_id>/
-                          └── opt_<subject_id>/
+                      |    ├── sim_<subject_id>/
+                      |    └── opt_<subject_id>/
+                      |__ utils 
 
 
 ### Toolbox & Scripts

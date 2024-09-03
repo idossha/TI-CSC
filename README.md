@@ -3,11 +3,11 @@
 
 ## Overview
 
-The **TI-CSC Toolbox** is a comprehensive set of tools designed for advanced simulations and analyses related to Temporal Interference (TI) and cortical stimulation studies. It integrates several open-source applications along with custom in-house scripts, providing a robust platform for academic research. The toolbox is intended strictly for academic, non-profit use.
+The **TI-CSC Toolbox** designed for advanced simulations and analyses related to Temporal Interference (TI). It integrates several open-source applications along with custom in-house scripts, providing a robust platform for academic research. The toolbox is intended strictly for academic, non-profit use.
 
 ## Features
 
-- **SimNIBS**: A simulation environment for transcranial brain stimulation, enabling realistic electric field modeling.
+- **SimNIBS**: A simulation environment for transcranial brain stimulation, enabling electric field modeling.
 - **FSL**: A comprehensive library of tools for analysis of functional and structural brain imaging data.
 - **FreeSurfer**: A software suite for the analysis and visualization of structural and functional neuroimaging data.
 - **Gmsh**: A three-dimensional finite element mesh generator with a built-in CAD engine and post-processor.
