@@ -9,6 +9,10 @@ import os
 Ido Haber - ihaber@wisc.edu
 September 4, 2024
 
+Script that helps you convert digitized EEG net from a .csv to .geo
+.geo is compatible with Gmsh which will be able to visualize 
+EEG net + head model
+
 
 '''
 
