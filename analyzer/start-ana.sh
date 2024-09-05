@@ -45,9 +45,9 @@ validate_pair() {
 project_base="/mnt/$PROJECT_DIR_NAME"
 subject_dir="$project_base/Subjects"
 simulation_dir="$project_base/Simulations"
-utils_dir="$project_base/utils/"
+utils_dir="$project_base/utils"
 
-if [ ! -d "$utils_dir"]; then
+if [ ! -d "$utils_dir" ]; then
   mkdir -p "$utils_dir"
 fi
 
