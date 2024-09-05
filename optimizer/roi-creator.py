@@ -51,10 +51,10 @@ def read_roi_coordinates(roi_name, directory):
 
 def call_view_nifti(roi_directory):
     # Assuming the script is in the same directory, you may need to adjust this path
-    view_nifti_script = os.path.join(os.path.dirname(__file__), "view-nifti.sh")
+    view_nifti_script = os.path.join(os.getcwd(), "view-nifti.sh")
 
     # Ensure the script has execute permissions
-    subprocess.call(['chmod', '+x', view_nifti_script])
+    subprocess.run(['chmod', '+x', view_nifti_script])
 
     # Extract project directory and subject name
     subject_name = os.path.basename(os.path.dirname(roi_directory)).replace('m2m_', '')
