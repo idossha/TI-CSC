@@ -1,9 +1,6 @@
 
 #!/bin/bash
 
-
-#!/bin/bash
-
 ##############################################
 # Ido Haber - ihaber@wisc.edu
 # September 2, 2024
@@ -36,6 +33,9 @@ selected_montages=("$@")
 # Set the script directory to the present working directory
 script_dir="$(pwd)"
 
+# Derive project_base from subject_dir (assuming subject_dir is project_base/Subjects/m2m_subjectID)
+project_base="$(dirname "$(dirname "$subject_dir")")"
+
 # Set subdirectory paths
 sim_dir="$simulation_dir/sim_${subject_id}"
 fem_dir="$sim_dir/FEM"
@@ -44,12 +44,21 @@ gm_mesh_dir="$sim_dir/GM_mesh"
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
+visualization_output_dir="$project_base/output"  # Adjust as needed
 
 # Ensure directories exist
-mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir"
+mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
 # Main script: Run TI.py with the selected parameters
 simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+
+# Function to visualize montages
+run_visualize_montages() {
+  echo "Visualizing selected montages..."
+  visualize_montage_script_path="$script_dir/visualize-montage.sh"
+  bash "$visualize_montage_script_path" "${selected_montages[@]}" "$visualization_output_dir"
+  echo "Montage visualization completed"
+}
 
 # Function to extract GM mesh
 extract_gm_mesh() {
@@ -71,12 +80,20 @@ transform_gm_to_nifti() {
 
 # Function to convert T1 to MNI space
 convert_t1_to_mni() {
-  local t1_file="$subject_dir/m2m_${subject_id}/T1.nii.gz"
-  local m2m_dir="$subject_dir/m2m_${subject_id}"
-  local output_file="$subject_dir/m2m_${subject_id}/T1_${subject_id}"
+  local t1_file="$subject_dir/T1.nii.gz"
+  local m2m_dir="$subject_dir"
+  local output_file="$subject_dir/T1_${subject_id}"
   echo "Converting T1 to MNI space..."
   subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
   echo "T1 conversion to MNI completed: $output_file"
+}
+
+# Function to call sphere-creater.sh
+run_sphere_creator() {
+  echo "Running sphere-creater.sh..."
+  sphere_creator_script_path="$script_dir/sphere-creater.sh"
+  bash "$sphere_creator_script_path" "$project_base" "$subject_id"
+  echo "Sphere creation completed"
 }
 
 # Function to process mesh files
@@ -119,17 +136,22 @@ for ti_dir in "$fem_dir"/TI_*; do
   fi
 done
 
+# Visualize selected montages
+run_visualize_montages
+
 # Extract GM from TI.msh
 for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
   output_file="$gm_mesh_dir/grey_$(basename "$mesh_file")"
   extract_gm_mesh "$mesh_file" "$output_file"
 done
 
+# Execute the pipeline steps
 transform_gm_to_nifti
 convert_t1_to_mni
+run_sphere_creator
 process_mesh_files
 run_sphere_analysis
-#generate_screenshots "$nifti_dir" "$screenshots_dir"
+# generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"
 

@@ -10,6 +10,9 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
+project_dir="/mnt/$PROJECT_DIR_NAME"
+subject_dir="$project_dir/Subjects"
+
 # Function to validate ROI input
 validate_coordinates() {
     local coords=$1
@@ -197,21 +200,6 @@ prompt_montages() {
     done
 }
 
-# Function to visualize montages
-visualize_montages() {
-    for montage in "${selected_montages[@]}"; do
-        echo "Visualizing montage: $montage"
-
-        # Call visualize-montage.sh for each montage
-        ./visualize-montage.sh "$montage" "$utils_dir" "$project_base/output"
-
-        if [ $? -ne 0 ]; then
-            echo "Error visualizing montage $montage. Exiting."
-            exit 1
-        fi
-    done
-}
-
 # Function to prompt and select ROIs
 prompt_rois() {
     while true;do
@@ -261,9 +249,6 @@ prompt_rois() {
 
 # Prompt the user to select montages
 prompt_montages
-
-# Visualize selected montages
-visualize_montages
 
 # Prompt the user to select ROIs
 prompt_rois
