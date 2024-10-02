@@ -43,7 +43,7 @@ overlay_rings() {
     IFS=' ' read -r x_adjusted y_adjusted <<< "$coords"
 
     # Use ImageMagick (magick) to overlay the ring image onto the output image at the specified coordinates
-    magick "$output_image" "/ti-csc/assets/amv/$ring_image" -geometry +${x_adjusted}+${y_adjusted} -composite "$output_image" || {
+    convert "$output_image" "/ti-csc/assets/amv/$ring_image" -geometry +${x_adjusted}+${y_adjusted} -composite "$output_image" || {
         echo "Error: Failed to overlay ring image '$ring_image' onto output image '$output_image'."
     }
 }

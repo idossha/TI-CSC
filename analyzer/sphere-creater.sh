@@ -3,112 +3,63 @@
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# September 2, 2024
-# Optimized for TI-CSC toolbox
+# October 2, 2024
+# Script to create spherical ROIs dynamically
 #
-# This script helps create spherical regions of interest (ROIs) with a specified radius 
-# as NIfTI files for visualization purposes. The spheres are based on voxel coordinates 
-# from an input NIfTI volume. The script combines these spheres into a single ROI volume 
-# for easier visualization and overlays it on the original volume using Freeview.
-#
-# Modifications:
-# - Takes input ROI from roi_list.json under the project directory /utils/roi_list.json
-# - Takes the volume under project_dir/Subjects/m2m_subjectID/T1_subjectID_MNI.nii.gz
-# - Outputs to project_dir/Simulation/sim_subjectID/niftis/
-#
-# Usage:
-# ./scriptname.sh <project_base_directory> <subject_id>
+# This script creates spherical regions of interest (ROIs) with a radius of 3 voxels 
+# based on voxel coordinates provided as input. The output is a NIfTI file for each ROI.
 ##############################################
 
-# Check for required arguments
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <project_base_directory> <subject_id>"
+set -e  # Exit immediately if a command exits with a non-zero status
+
+# Check if the required arguments are passed
+if [ $# -lt 3 ]; then
+    echo "Usage: $0 <project_base_dir> <subject_id> <roi_coordinates>"
+    echo "Example: $0 /path/to/project sim_subjectID '95 73 127'"
     exit 1
 fi
 
-# Get arguments
-project_base="$1"
-subject_id="$2"
+# Arguments
+project_base=$1
+subject_id=$2
+roi_coordinates=$3  # This is the user-provided ROI coordinates (X Y Z) collected by start-ana.sh
 
-# Set up directories
-utils_dir="$project_base/utils"
-subject_dir="$project_base/Subjects/m2m_$subject_id"
+# Set important directories
+simulation_dir="${project_base}/Simulations/sim_${subject_id}"
+nifti_dir="${simulation_dir}/niftis"
 
-# Volume file path
-volume_file="$subject_dir/T1_${subject_id}_MNI.nii.gz"
+# Ensure output directory exists
+mkdir -p "$nifti_dir"
 
-# ROI file path
-roi_file="$utils_dir/roi_list.json"
-
-# Output directory
-simulation_dir="$project_base/Simulations/sim_$subject_id"
-output_dir="$simulation_dir/niftis/"
-mkdir -p "$output_dir"
-
-# Check if volume exists
-if [ ! -f "$volume_file" ]; then
-    echo "Volume file not found: $volume_file"
+# Input volume (e.g., an MNI152 template or subject-specific volume)
+input_volume="${nifti_dir}/T1_${subject_id}_MNI.nii.gz"
+if [ ! -f "$input_volume" ]; then
+    echo "Error: Input volume $input_volume not found."
     exit 1
 fi
 
-# Check if roi_list.json exists
-if [ ! -f "$roi_file" ]; then
-    echo "ROI file not found: $roi_file"
-    exit 1
-fi
+# Output file
+roi_output="${nifti_dir}/ROI-sphere.nii.gz"
 
-# Check if jq is installed
-if ! command -v jq &> /dev/null; then
-    echo "jq command not found. Please install jq."
-    exit 1
-fi
+# Split ROI coordinates into X, Y, Z
+IFS=' ' read -r vx vy vz <<< "$roi_coordinates"
 
-# Read ROIs into arrays
-rois=$(jq -r '.ROIs | keys[]' "$roi_file")
-locations=()
-location_names=()
-
-for roi_name in $rois; do
-    coord=$(jq -r ".ROIs[\"$roi_name\"]" "$roi_file")
-    locations+=("$coord")
-    location_names+=("$roi_name")
-done
-
-# If no ROIs are found
-if [ ${#locations[@]} -eq 0 ]; then
-    echo "No ROIs found in $roi_file"
-    exit 1
-fi
-
-# Radius for the spherical region (in voxels)
+# Radius for the spherical ROI (3 voxels)
 radius=3
 
-# Initialize the combined ROI volume with zeros
-combined_roi_file="${output_dir}/combined-spheres.nii.gz"
-fslmaths "$volume_file" -mul 0 "$combined_roi_file" -odt float
+# Initialize the output NIfTI file with zeros
+fslmaths "$input_volume" -mul 0 "$roi_output" -odt float
 
-# Create spherical ROIs and combine them into the combined ROI volume
-for i in "${!locations[@]}"; do
-  location="${locations[$i]}"
-  location_name="${location_names[$i]}"
+# Create the spherical ROI
+temp_sphere="temp_sphere.nii.gz"
+fslmaths "$input_volume" -mul 0 -add 1 -roi "$vx" 1 "$vy" 1 "$vz" 1 0 1 temp_point.nii.gz -odt float
+fslmaths temp_point.nii.gz -kernel sphere $radius -dilM -bin "$temp_sphere" -odt float
 
-  IFS=' ' read -r vx vy vz <<< "$location"
+# Add the spherical ROI to the output volume
+fslmaths "$roi_output" -add "$temp_sphere" "$roi_output" -odt float
 
-  roi_file="${output_dir}/sphere_${location_name}.nii.gz"
+# Clean up temporary files
+rm -f temp_point.nii.gz "$temp_sphere"
 
-  # Create the spherical ROI
-  fslmaths "$volume_file" -mul 0 -add 1 -roi "$vx" 1 "$vy" 1 "$vz" 1 0 1 temp_point -odt float
-  fslmaths temp_point -kernel sphere "$radius" -dilM -bin "$roi_file" -odt float
+echo "Sphere created for ROI at ($vx, $vy, $vz) and saved to $roi_output."
 
-  # Add the spherical ROI to the combined volume
-  fslmaths "$combined_roi_file" -add "$roi_file" "$combined_roi_file" -odt float
-
-  # Delete the temporary spherical ROI file
-  rm -f "$roi_file"
-done
-
-# Delete the temporary point file
-rm -f temp_point.nii.gz
-
-# Visualize the original volume and the combined spherical ROIs with Freeview
-freeview -v "$volume_file":colormap=grayscale "$combined_roi_file":colormap=heat:opacity=0.4 &
