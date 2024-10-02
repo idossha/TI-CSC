@@ -50,7 +50,7 @@ visualization_output_dir="$sim_dir/montage_imgs/"  # Adjust as needed
 mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
 # Main script: Run TI.py with the selected parameters
-#simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
 
 # Function to visualize montages
 run_visualize_montages() {
@@ -135,10 +135,10 @@ for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
 done
 
 run_visualize_montages
-#transform_gm_to_nifti
-#convert_t1_to_mni
-#process_mesh_files
-#run_sphere_analysis
+transform_gm_to_nifti
+convert_t1_to_mni
+process_mesh_files
+run_sphere_analysis
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"

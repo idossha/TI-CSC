@@ -256,7 +256,9 @@ for subject_index in "${selected_subjects[@]}";do
 
     # Call the appropriate main pipeline script with the gathered parameters
     ./"$main_script" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
-
+ 
+    # Call sphere-analysis.sh with the selected ROIs
+    ./sphere-analysis.sh "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
 done
 
 if $new_montage_added;then
