@@ -4,7 +4,7 @@
 ###########################################
 # Ido Haber / ihaber@wisc.edu
 # September 2, 2024
-# optimizer for TI-CSC analyzer
+# optimized for TI-CSC analyzer
 # This script is used to run a simulation pipeline for a given subject. 
 ###########################################
 

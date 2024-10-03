@@ -1,5 +1,14 @@
 #!/bin/bash
 
+###########################################
+# Aksel W Jackson / awjackson2@wisc.edu
+# Ido Haber / ihaber@wisc.edu
+# October 2, 2024
+# optimized for TI-CSC analyzer
+# This script creates a png visualization the electrode montage from user input
+###########################################
+
+
 # Define paths
 project_base="/mnt/$PROJECT_DIR_NAME"
 utils_dir="$project_base/utils"

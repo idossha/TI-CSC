@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python3
 
 import copy
@@ -9,7 +11,7 @@ from simnibs.utils import TI_utils as TI
 
 '''
 Ido Haber - ihaber@wisc.edu
-September 2, 2024
+October 3, 2024
 Optimized for optimizer pipeline
 
 This script is designed for performing Temporal Interference (TI) simulations 
@@ -72,6 +74,7 @@ def process_leadfield(leadfield_type, E1_plus, E1_minus, E2_plus, E2_minus, inte
 
     # Generate all combinations
     all_combinations = generate_combinations(E1_plus, E1_minus, E2_plus, E2_minus)
+    total_combinations = len(all_combinations)  # Calculate total configurations
 
     # Iterate through all combinations of electrode pairs
     for i, ((e1p, e1m), (e2p, e2m)) in enumerate(all_combinations):
@@ -108,7 +111,9 @@ def process_leadfield(leadfield_type, E1_plus, E1_minus, E2_plus, E2_minus, inte
         )
         v.write_opt(mesh_filename)
 
-        print(f"Saved {mesh_filename}")
+        # Progress indicator (formatted as 003/256)
+        progress_str = f"{i+1:03}/{total_combinations}"
+        print(f"{progress_str} Saved {mesh_filename}")
 
 if __name__ == "__main__":
     # Get electrode lists from user input

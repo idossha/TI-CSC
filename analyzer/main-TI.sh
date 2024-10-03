@@ -44,7 +44,7 @@ gm_mesh_dir="$sim_dir/GM_mesh"
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
-visualization_output_dir="$sim_dir/montage_imgs/"  # Adjust as needed
+visualization_output_dir="$sim_dir/montage_imgs/"  
 
 # Ensure directories exist
 mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"

@@ -1,3 +1,4 @@
+
 import os
 import meshio
 import nibabel as nib
@@ -5,7 +6,7 @@ import numpy as np
 
 '''
 Ido Haber - ihaber@wisc.edu
-September 2, 2024
+October 3, 2024
 Optimized for optimizer pipeline
 
 This script extracts the vector of the normal component of the TI field with 
@@ -17,7 +18,6 @@ Key Features:
 - Uses the reference T1-weighted MRI scan to ensure proper spatial alignment.
 - Processes all relevant mesh files in the directory and saves the results as NIfTI files.
 '''
-
 
 def create_volumetric_nifti(source_msh_file, reference_nifti_file, output_nifti_file, field_name):
     """Convert a surface field from a mesh to a volumetric NIfTI."""
@@ -54,11 +54,21 @@ def process_directory(project_dir, subject_name, field_name="TIamp_localnorm"):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
-    for filename in os.listdir(input_dir):
-        if filename.startswith("TI_norm_field") and filename.endswith(".msh"):
-            source_msh_file = os.path.join(input_dir, filename)
-            output_nifti_file = os.path.join(output_dir, f"{os.path.splitext(filename)[0]}_volumetric.nii.gz")
-            create_volumetric_nifti(source_msh_file, reference_nifti_file, output_nifti_file, field_name)
+    # Get the list of relevant .msh files
+    msh_files = [f for f in os.listdir(input_dir) if f.startswith("TI_norm_field") and f.endswith(".msh")]
+    total_files = len(msh_files)  # Total number of files to process
+    
+    # Process each .msh file and display progress
+    for i, filename in enumerate(msh_files):
+        source_msh_file = os.path.join(input_dir, filename)
+        output_nifti_file = os.path.join(output_dir, f"{os.path.splitext(filename)[0]}_volumetric.nii.gz")
+        
+        # Progress indicator (formatted as 003/256)
+        progress_str = f"{i+1:03}/{total_files}"
+        print(f"{progress_str} Processing {filename}...")
+
+        # Call the function to create a volumetric NIfTI file
+        create_volumetric_nifti(source_msh_file, reference_nifti_file, output_nifti_file, field_name)
 
 if __name__ == "__main__":
     # Get project directory and subject name from environment variables
@@ -67,3 +77,4 @@ if __name__ == "__main__":
 
     # Process all relevant .msh files and convert them to NIfTI
     process_directory(project_dir, subject_name)
+

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 
 import os
@@ -10,7 +11,7 @@ import csv
 
 '''
 Ido Haber - ihaber@wisc.edu
-September 2, 2024
+October 3, 2024
 Optimized for optimizer pipeline
 
 This script analyzes mesh files in the simulation directory by extracting 
@@ -22,7 +23,6 @@ Key Features:
 - Formats the extracted data and writes it to a CSV file for reporting.
 - Performs cleanup by removing intermediate CSV files after processing.
 '''
-
 
 # Get the project directory and subject name from environment variables
 project_dir = os.getenv('PROJECT_DIR')
@@ -40,80 +40,86 @@ with open(roi_list_path, 'r') as file:
 # Create a dictionary to hold the data
 mesh_data = {}
 
-# Iterate over all .msh files in the opt directory
-for msh_file in os.listdir(opt_directory):
-    if msh_file.endswith('.msh'):
-        msh_file_path = os.path.join(opt_directory, msh_file)
-        print(f"Processing {msh_file_path}")
+# Get the list of .msh files in the opt directory and count the total number
+msh_files = [f for f in os.listdir(opt_directory) if f.endswith('.msh')]
+total_files = len(msh_files)  # Total number of files to process
+
+# Iterate over all .msh files in the opt directory with progress indicator
+for i, msh_file in enumerate(msh_files):
+    msh_file_path = os.path.join(opt_directory, msh_file)
+
+    # Progress indicator (formatted as 001/100)
+    progress_str = f"{i+1:03}/{total_files}"
+    print(f"{progress_str} Processing {msh_file_path}")
+    
+    # Use only the file name part for mesh_key
+    mesh_key = os.path.basename(msh_file_path)
+    mesh_data[mesh_key] = {}
+
+    # Iterate over all position files
+    for pos_file in position_files:
+        pos_base = os.path.splitext(os.path.basename(pos_file))[0]  # Extract the base name of the position file without extension
+        print(f"  Using position file {pos_file}")
+
+        # Run the command to generate CSV files in the ROI directory
+        try:
+            print(f"Running command: get_fields_at_coordinates -s {pos_file} -m {msh_file_path} --method linear")
+            subprocess.run(["get_fields_at_coordinates", "-s", pos_file, "-m", msh_file_path, "--method", "linear"], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error running get_fields_at_coordinates: {e}")
+            continue
         
-        # Use only the file name part for mesh_key
-        mesh_key = os.path.basename(msh_file_path)
-        mesh_data[mesh_key] = {}
-
-        # Iterate over all position files
-        for pos_file in position_files:
-            pos_base = os.path.splitext(os.path.basename(pos_file))[0]  # Extract the base name of the position file without extension
-            print(f"  Using position file {pos_file}")
-
-            # Run the command to generate CSV files in the ROI directory
+        # The generated CSV files will be in the ROI directory with names based on the position file and field names
+        ti_max_csv = os.path.join(roi_directory, f"{pos_base}_TImax.csv")
+        from_volume_csv = os.path.join(roi_directory, f"{pos_base}_from_volume.csv")
+        
+        # Process the TImax CSV file
+        if os.path.exists(ti_max_csv):
+            print(f"Found TImax CSV file: {ti_max_csv}")
             try:
-                print(f"Running command: get_fields_at_coordinates -s {pos_file} -m {msh_file_path} --method linear")
-                subprocess.run(["get_fields_at_coordinates", "-s", pos_file, "-m", msh_file_path, "--method", "linear"], check=True)
-            except subprocess.CalledProcessError as e:
-                print(f"Error running get_fields_at_coordinates: {e}")
-                continue
-            
-            # The generated CSV files will be in the ROI directory with names based on the position file and field names
-            ti_max_csv = os.path.join(roi_directory, f"{pos_base}_TImax.csv")
-            from_volume_csv = os.path.join(roi_directory, f"{pos_base}_from_volume.csv")
-            
-            # Process the TImax CSV file
-            if os.path.exists(ti_max_csv):
-                print(f"Found TImax CSV file: {ti_max_csv}")
-                try:
-                    # Read the CSV file into a dataframe without headers
-                    df_ti_max = pd.read_csv(ti_max_csv, header=None)
-                    
-                    # Ensure all data can be converted to float
-                    df_ti_max = df_ti_max.apply(pd.to_numeric, errors='coerce')
-                    df_ti_max = df_ti_max.dropna()  # Drop rows with non-numeric data
-                    
-                    # Extract values from the dataframe
-                    ti_max_values = df_ti_max[0].tolist()  # Assuming the TImax CSV has values in the first column
-                    
-                    # Store the values in the dictionary
-                    if 'TImax' not in mesh_data[mesh_key]:
-                        mesh_data[mesh_key]['TImax'] = ti_max_values[0] if ti_max_values else None
-                except Exception as e:
-                    print(f"Error processing TImax file {ti_max_csv}: {e}")
-                finally:
-                    os.remove(ti_max_csv)
-            else:
-                print(f"    TImax CSV file {ti_max_csv} not found. Skipping this file.")
+                # Read the CSV file into a dataframe without headers
+                df_ti_max = pd.read_csv(ti_max_csv, header=None)
+                
+                # Ensure all data can be converted to float
+                df_ti_max = df_ti_max.apply(pd.to_numeric, errors='coerce')
+                df_ti_max = df_ti_max.dropna()  # Drop rows with non-numeric data
+                
+                # Extract values from the dataframe
+                ti_max_values = df_ti_max[0].tolist()  # Assuming the TImax CSV has values in the first column
+                
+                # Store the values in the dictionary
+                if 'TImax' not in mesh_data[mesh_key]:
+                    mesh_data[mesh_key]['TImax'] = ti_max_values[0] if ti_max_values else None
+            except Exception as e:
+                print(f"Error processing TImax file {ti_max_csv}: {e}")
+            finally:
+                os.remove(ti_max_csv)
+        else:
+            print(f"    TImax CSV file {ti_max_csv} not found. Skipping this file.")
 
-            # Process the from_volume CSV file
-            if os.path.exists(from_volume_csv):
-                print(f"Found from_volume CSV file: {from_volume_csv}")
-                try:
-                    # Read the CSV file into a dataframe without headers
-                    df_from_volume = pd.read_csv(from_volume_csv, header=None)
-                    
-                    # Ensure all data can be converted to float
-                    df_from_volume = df_from_volume.apply(pd.to_numeric, errors='coerce')
-                    df_from_volume = df_from_volume.dropna()  # Drop rows with non-numeric data
-                    
-                    # Extract values from the dataframe
-                    from_volume_values = df_from_volume[0].tolist()  # Assuming the from_volume CSV has values in the first column
-                    
-                    # Store the values in the dictionary
-                    if 'TInorm' not in mesh_data[mesh_key]:
-                        mesh_data[mesh_key]['TInorm'] = from_volume_values[0] if from_volume_values else None
-                except Exception as e:
-                    print(f"Error processing from_volume file {from_volume_csv}: {e}")
-                finally:
-                    os.remove(from_volume_csv)
-            else:
-                print(f"    from_volume CSV file {from_volume_csv} not found. Skipping this file.")
+        # Process the from_volume CSV file
+        if os.path.exists(from_volume_csv):
+            print(f"Found from_volume CSV file: {from_volume_csv}")
+            try:
+                # Read the CSV file into a dataframe without headers
+                df_from_volume = pd.read_csv(from_volume_csv, header=None)
+                
+                # Ensure all data can be converted to float
+                df_from_volume = df_from_volume.apply(pd.to_numeric, errors='coerce')
+                df_from_volume = df_from_volume.dropna()  # Drop rows with non-numeric data
+                
+                # Extract values from the dataframe
+                from_volume_values = df_from_volume[0].tolist()  # Assuming the from_volume CSV has values in the first column
+                
+                # Store the values in the dictionary
+                if 'TInorm' not in mesh_data[mesh_key]:
+                    mesh_data[mesh_key]['TInorm'] = from_volume_values[0] if from_volume_values else None
+            except Exception as e:
+                print(f"Error processing from_volume file {from_volume_csv}: {e}")
+            finally:
+                os.remove(from_volume_csv)
+        else:
+            print(f"    from_volume CSV file {from_volume_csv} not found. Skipping this file.")
 
 # Save the dictionary to a file for later use
 json_output_path = os.path.join(opt_directory, 'mesh_data.json')

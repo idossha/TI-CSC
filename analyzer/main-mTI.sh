@@ -5,7 +5,7 @@
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# September 2, 2024
+# October 3, 2024
 # Optimized for optimizer pipeline
 #
 # This script orchestrates the full workflow for Multi-Polar Temporal Interference (mTI) simulations 
@@ -43,9 +43,10 @@ gm_mesh_dir="$sim_dir/GM_mesh"
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
+visualization_output_dir="$sim_dir/montage_imgs/" 
 
 # Ensure directories exist
-mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir"
+mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
 # Main script: Run mTI.py with the selected parameters
 run_mti_simulation() {
@@ -63,6 +64,14 @@ run_mti_simulation() {
         exit 1
     fi
     echo "mTI simulation completed"
+}
+
+# Function to visualize montages
+run_visualize_montages() {
+    echo "Visualizing selected montages..."
+    visualize_montage_script_path="$script_dir/visualize-montage.sh"
+    bash "$visualize_montage_script_path" "${selected_montages[@]}" "$visualization_output_dir"
+    echo "Montage visualization completed"
 }
 
 # Function to extract GM mesh
@@ -96,7 +105,6 @@ convert_t1_to_mni() {
   subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
   echo "T1 conversion to MNI completed: $output_file"
 }
-
 
 # Function to process mesh files
 process_mesh_files() {
@@ -155,6 +163,7 @@ for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
     extract_gm_mesh "$mesh_file" "$output_file"
 done
 
+run_visualize_montages
 transform_gm_to_nifti
 convert_t1_to_mni
 process_mesh_files
