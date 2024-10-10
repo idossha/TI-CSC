@@ -36,6 +36,52 @@ tensor_file = os.path.join(conductivity_path, "DTI_coregT1_tensor.nii.gz")
 if not os.path.exists(base_pathfem):
     os.makedirs(base_pathfem)
 
+def get_TI_vectors(E1_org, E2_org):
+    """
+    calculates the modulation amplitude vectors for the TI envelope
+
+    Parameters
+    ----------
+    E1_org : np.ndarray
+           field of electrode pair 1 (N x 3) where N is the number of
+           positions at which the field was calculated
+    E2_org : np.ndarray
+        field of electrode pair 2 (N x 3)
+
+    Returns
+    -------
+    TI_vectors : np.ndarray (N x 3)
+        modulation amplitude vectors
+    """
+    assert E1_org.shape == E2_org.shape
+    assert E1_org.shape[1] == 3
+    E1 = E1_org.copy()
+    E2 = E2_org.copy()
+
+    # ensure E1>E2
+    idx = np.linalg.norm(E2, axis=1) > np.linalg.norm(E1, axis=1)
+    E1[idx] = E2[idx]
+    E2[idx] = E1_org[idx]
+
+    # ensure alpha < pi/2
+    idx = np.sum(E1 * E2, axis=1) < 0
+    E2[idx] = -E2[idx]
+
+    # get maximal amplitude of envelope
+    normE1 = np.linalg.norm(E1, axis=1)
+    normE2 = np.linalg.norm(E2, axis=1)
+    cosalpha = np.sum(E1 * E2, axis=1) / (normE1 * normE2)
+
+    idx = normE2 <= normE1 * cosalpha
+    
+    TI_vectors = np.zeros_like(E1)
+    TI_vectors[idx] = 2 * E2[idx]
+    TI_vectors[~idx] = 2 * np.cross(E2[~idx], E1[~idx] - E2[~idx]) / np.linalg.norm(E1[~idx] - E2[~idx], axis=1)[:, None]
+
+    return TI_vectors
+
+
+
 # Function to run simulations
 def run_simulation(montage_name, montage):
     S = sim_struct.SESSION()
@@ -94,7 +140,7 @@ def run_simulation(montage_name, montage):
 
     ef1 = m1.field["E"]
     ef2 = m2.field["E"]
-    TImax_vectors = TI.get_TImax_vectors(ef1.value, ef2.value)
+    TImax_vectors = get_TI_vectors(ef1.value, ef2.value)
 
     mout = deepcopy(m1)
     mout.elmdata = []
