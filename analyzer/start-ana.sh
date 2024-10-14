@@ -3,7 +3,7 @@
 
 ###########################################
 # Ido Haber / ihaber@wisc.edu
-# September 2, 2024
+# October 14, 2024
 # optimized for TI-CSC analyzer
 # This script is used to run a simulation pipeline for a given subject. 
 ###########################################
@@ -12,6 +12,8 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 project_dir="/mnt/$PROJECT_DIR_NAME"
 subject_dir="$project_dir/Subjects"
+simulation_dir="$project_dir/Simulations"
+utils_dir="$project_dir/utils"
 
 # Function to validate ROI input
 validate_coordinates() {
@@ -33,9 +35,11 @@ validate_pair() {
     return 0
 }
 
-subject_dir="$project_dir/Subjects"
-simulation_dir="$project_dir/Simulations"
-utils_dir="$project_dir/utils"
+# Ensure utils_dir exists
+if [ ! -d "$utils_dir" ]; then
+    mkdir -p "$utils_dir"
+    echo "Created utils directory: $utils_dir."
+fi
 
 # Ensure montage_list.json exists
 montage_file="$utils_dir/montage_list.json"
