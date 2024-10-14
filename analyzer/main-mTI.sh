@@ -1,25 +1,10 @@
-#!/bin/bash
-
 
 #!/bin/bash
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# October 3, 2024
+# October 14, 2024
 # Optimized for optimizer pipeline
-#
-# This script orchestrates the full workflow for Multi-Polar Temporal Interference (mTI) simulations 
-# using SimNIBS and other related tools. It handles the entire process from simulation execution 
-# to mesh processing, Grey Matter (GM) extraction, and NIfTI conversion. It includes safeguards to 
-# ensure that each step completes successfully and allows for easy debugging.
-#
-# Key Features:
-# - Runs mTI simulations based on selected montages.
-# - Extracts and processes GM meshes, converting them to NIfTI format in MNI space.
-# - Converts T1-weighted MRI to MNI space for accurate anatomical reference.
-# - Provides mechanisms to handle errors at each stage of the pipeline.
-# - Supports the generation of screenshots for visual inspection of results.
-#
 ##############################################
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -29,8 +14,9 @@ subject_id=$1
 conductivity=$2
 subject_dir=$3
 simulation_dir=$4
-shift 4
-selected_montages=("$@")
+sim_mode=$5   # Capture the montage type (U or M) as the 5th argument
+shift 5
+selected_montages=("$@")  # All remaining arguments are montages
 
 # Set the script directory to the present working directory
 script_dir="$(pwd)"
@@ -43,7 +29,7 @@ gm_mesh_dir="$sim_dir/GM_mesh"
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
-visualization_output_dir="$sim_dir/montage_imgs/" 
+visualization_output_dir="$sim_dir/montage_imgs/"
 
 # Ensure directories exist
 mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
@@ -66,11 +52,13 @@ run_mti_simulation() {
     echo "mTI simulation completed"
 }
 
+
 # Function to visualize montages
 run_visualize_montages() {
     echo "Visualizing selected montages..."
     visualize_montage_script_path="$script_dir/visualize-montage.sh"
-    bash "$visualize_montage_script_path" "${selected_montages[@]}" "$visualization_output_dir"
+    # Pass the selected montages, the montage type (sim_mode), and the output directory
+    bash "$visualize_montage_script_path" "${selected_montages[@]}" "$sim_mode" "$visualization_output_dir"
     echo "Montage visualization completed"
 }
 
@@ -94,16 +82,16 @@ transform_gm_to_nifti() {
     mesh2nii_script_path="$script_dir/mesh2nii_loop.sh"
     bash "$mesh2nii_script_path" "$subject_id" "$subject_dir" "$simulation_dir"
     echo "GM mesh to NIfTI transformation completed"
-  }
+}
 
 # Function to convert T1 to MNI space
 convert_t1_to_mni() {
-  local t1_file="$subject_dir/m2m_${subject_id}/T1.nii.gz"
-  local m2m_dir="$subject_dir/m2m_${subject_id}"
-  local output_file="$subject_dir/m2m_${subject_id}/T1_${subject_id}"
-  echo "Converting T1 to MNI space..."
-  subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
-  echo "T1 conversion to MNI completed: $output_file"
+    local t1_file="$subject_dir/m2m_${subject_id}/T1.nii.gz"
+    local m2m_dir="$subject_dir/m2m_${subject_id}"
+    local output_file="$subject_dir/m2m_${subject_id}/T1_${subject_id}"
+    echo "Converting T1 to MNI space..."
+    subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
+    echo "T1 conversion to MNI completed: $output_file"
 }
 
 # Function to process mesh files
@@ -147,7 +135,7 @@ generate_screenshots() {
 # Run the main mTI simulation
 run_mti_simulation "$script_dir" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
 
-# # Move .msh files to the whole-brain-mesh directory
+# Move .msh files to the whole-brain-mesh directory
 for ti_msh_file in "$fem_dir"/*.msh; do
     if [ -e "$ti_msh_file" ]; then
         new_name="${subject_id}_$(basename "$ti_msh_file")"
@@ -163,11 +151,12 @@ for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
     extract_gm_mesh "$mesh_file" "$output_file"
 done
 
-run_visualize_montages
+run_visualize_montages  # Ensure the visualization runs at the appropriate point
 transform_gm_to_nifti
 convert_t1_to_mni
 process_mesh_files
 run_sphere_analysis
+
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"

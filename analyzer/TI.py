@@ -9,8 +9,8 @@ from simnibs.utils import TI_utils as TI
 ###########################################
 
 # Ido Haber / ihaber@wisc.edu
-# September 2, 2024
-# optimizer for TI-CSC analyzer
+# October 14, 2024
+# optimized for TI-CSC analyzer
 
 # This script runs SimNIBS simulations
 
@@ -29,7 +29,6 @@ from simnibs.utils import TI_utils as TI
 ###########################################
 
 
-
 # Get subject ID, simulation type, and montages from command-line arguments
 subject_id = sys.argv[1]
 sim_type = sys.argv[2]  # The anisotropy type
@@ -45,9 +44,15 @@ montage_file = os.path.join(utils_dir, 'montage_list.json')
 with open(montage_file) as f:
     all_montages = json.load(f)
 
-# Create the montages dictionary based on the selected montages
-montages = {name: all_montages['uni_polar_montages'].get(name, all_montages['multi_polar_montages'].get(name))
-            for name in montage_names}
+# Check and process montages for unipolar montages
+montages = {name: all_montages['uni_polar_montages'].get(name) for name in montage_names}
+
+# Validate montage structure
+def validate_montage(montage, montage_name):
+    if not montage or len(montage) < 2 or len(montage[0]) < 2:
+        print(f"Invalid montage structure for {montage_name}. Skipping.")
+        return False
+    return True
 
 # Base paths
 base_subpath = os.path.join(subject_dir, f"m2m_{subject_id}")
@@ -61,6 +66,9 @@ if not os.path.exists(base_pathfem):
 
 # Function to run simulations
 def run_simulation(montage_name, montage):
+    if not validate_montage(montage, montage_name):
+        return
+
     S = sim_struct.SESSION()
     S.subpath = base_subpath
     S.anisotropy_type = sim_type
@@ -80,6 +88,7 @@ def run_simulation(montage_name, montage):
     tdcs = S.add_tdcslist()
     tdcs.anisotropy_type = sim_type  # Set anisotropy_type to the input sim_type
     tdcs.currents = [0.005, -0.005]
+    
     electrode = tdcs.add_electrode()
     electrode.channelnr = 1
     electrode.centre = montage[0][0]
@@ -129,8 +138,8 @@ def run_simulation(montage_name, montage):
 
 # Run the simulations for each selected montage
 for name in montage_names:
-    if name in montages:
+    if name in montages and montages[name]:
         run_simulation(name, montages[name])
     else:
-        print(f"Montage {name} not found. Skipping.")
+        print(f"Montage {name} not found or invalid. Skipping.")
 

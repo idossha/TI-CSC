@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 
@@ -5,7 +6,7 @@
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# October 2, 2024
+# October 14, 2024
 # Optimized for optimizer pipeline
 #
 # This script orchestrates the full pipeline for Temporal Interference (TI) simulations
@@ -30,7 +31,8 @@ subject_id=$1
 conductivity=$2
 subject_dir=$3
 simulation_dir=$4
-shift 4
+sim_mode=$5
+shift 5
 selected_montages=("$@")
 
 # Set the script directory to the present working directory
@@ -56,7 +58,7 @@ simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_d
 run_visualize_montages() {
     echo "Visualizing selected montages..."
     visualize_montage_script_path="$script_dir/visualize-montage.sh"
-    bash "$visualize_montage_script_path" "${selected_montages[@]}" "$visualization_output_dir"
+    bash "$visualize_montage_script_path" "${selected_montages[@]}" "$sim_mode" "$visualization_output_dir"
     echo "Montage visualization completed"
 }
 
