@@ -1,26 +1,16 @@
-
-#!/bin/bash
-
-
 #!/bin/bash
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# October 14, 2024
+# October 15, 2024
 # Optimized for optimizer pipeline
 #
 # This script orchestrates the full pipeline for Temporal Interference (TI) simulations
 # using SimNIBS and other related tools. It handles directory setup, simulation execution,
 # mesh processing, GM extraction, NIfTI transformation, and other key tasks.
 #
-# Key Features:
-# - Manages the execution of TI simulations based on selected montages.
-# - Creates an montage visualization
-# - Extracts and processes Grey Matter (GM) meshes.
-# - Transforms GM meshes to NIfTI format in MNI space.
-# - Converts T1-weighted MRI to MNI space.
-# - Executes additional analyses, such as sphere-based ROI analysis.
-# - Supports multiple simulation types, including isotropic and anisotropic conductivity.
+# New Feature:
+# - Automatically creates spherical ROIs and visualizes them based on the user’s input.
 #
 ##############################################
 
@@ -31,8 +21,7 @@ subject_id=$1
 conductivity=$2
 subject_dir=$3
 simulation_dir=$4
-sim_mode=$5
-shift 5
+shift 4
 selected_montages=("$@")
 
 # Set the script directory to the present working directory
@@ -46,13 +35,13 @@ gm_mesh_dir="$sim_dir/GM_mesh"
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
-visualization_output_dir="$sim_dir/montage_imgs/"  
+visualization_output_dir="$sim_dir/montage_imgs/"
 
 # Ensure directories exist
 mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
 # Main script: Run TI.py with the selected parameters
-simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+#simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
 
 # Function to visualize montages
 run_visualize_montages() {
@@ -101,9 +90,9 @@ process_mesh_files() {
 # Function to run sphere analysis
 run_sphere_analysis() {
   echo "Running sphere analysis..."
-  sphere_analysis_script_path="$script_dir/sphere-analysis.sh"
-  bash "$sphere_analysis_script_path" "$subject_id" "$simulation_dir"
-  echo "Sphere analysis completed"
+  sphere_analysis_script_path="$script_dir/sphere-creater.sh"
+  bash "$sphere_analysis_script_path" "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
+  echo "Sphere analysis and spherical ROI creation completed"
 }
 
 # Function to generate screenshots
@@ -136,11 +125,11 @@ for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
   extract_gm_mesh "$mesh_file" "$output_file"
 done
 
-run_visualize_montages
-transform_gm_to_nifti
-convert_t1_to_mni
-process_mesh_files
-run_sphere_analysis
+#run_visualize_montages
+#transform_gm_to_nifti
+#convert_t1_to_mni
+#process_mesh_files
+#run_sphere_analysis  # Add this step to create the spherical ROIs
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"

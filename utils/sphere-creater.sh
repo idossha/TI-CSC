@@ -71,6 +71,3 @@ done
 # Delete the temporary point file
 rm -f temp_point.nii.gz
 
-# Visualize the original volume and the combined spherical ROIs with Freeview
-freeview -v ${volumes[0]}:colormap=grayscale $combined_roi_file:colormap=heat:opacity=0.4 &
-

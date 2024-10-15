@@ -1,9 +1,8 @@
-
 #!/bin/bash
 
 ###########################################
 # Ido Haber / ihaber@wisc.edu
-# October 14, 2024
+# October 15, 2024
 # optimized for TI-CSC analyzer
 # This script is used to run a simulation pipeline for a given subject. 
 ###########################################
@@ -67,7 +66,7 @@ list_subjects() {
     subjects=()
     i=1
     for subject_path in "$subject_dir"/m2m_*; do
-        if [ -d "$subject_path" ]; then
+        if [ -d "$subject_path" ];then
             subject_id=$(basename "$subject_path" | sed 's/m2m_//')
             subjects+=("$subject_id")
             echo "$i. $subject_id"
@@ -90,7 +89,7 @@ choose_subjects() {
         if [[ "$subject_choices" =~ ^[0-9,]+$ ]]; then
             IFS=',' read -r -a selected_subjects <<< "$subject_choices"
             for num in "${selected_subjects[@]}"; do
-                if [[ $num -le 0 || $num -gt ${#subjects[@]} ]]; then
+                if [[ $num -le 0 || $num -gt ${#subjects[@]} ]];then
                     reprompt
                     continue 2  # Reprompt the user
                 fi
@@ -146,12 +145,12 @@ choose_anisotropic_type() {
 choose_simulation_mode() {
     while true; do
         read -p "Unipolar or Multipolar simulation? Enter U or M: " sim_mode
-        if [[ "$sim_mode" == "U" ]]; then
+        if [[ "$sim_mode" == "U" ]];then
             montage_type="uni_polar_montages"
             main_script="main-TI.sh"
             montage_type_text="Unipolar"
             break
-        elif [[ "$sim_mode" == "M" ]]; then
+        elif [[ "$sim_mode" == "M" ]];then
             montage_type="multi_polar_montages"
             main_script="main-mTI.sh"
             montage_type_text="Multipolar"
@@ -171,11 +170,11 @@ prompt_montages() {
         montage_array=($montages)
         half_count=$(( (${#montage_array[@]} + 1) / 2 ))
 
-        for (( i=0; i<half_count; i++ )); do
+        for (( i=0; i<half_count; i++ ));do
             left="${montage_array[$i]}"
             right="${montage_array[$((i + half_count))]}"
             printf "%2d. %-20s" $((i + 1)) "$left"
-            if [ -n "$right" ];then
+            if [ -n "$right" ]; then
                 printf "%2d. %s" $((i + 1 + half_count)) "$right"
             fi
             printf "\n"
@@ -184,7 +183,7 @@ prompt_montages() {
         echo "$(( ${#montage_array[@]} + 1 )). Add a new montage?"
 
         read -p "Enter the numbers of the montages to simulate (comma-separated): " montage_choices
-        if [[ ! "$montage_choices" =~ ^[0-9,]+$ ]]; then
+        if [[ ! "$montage_choices" =~ ^[0-9,]+$ ]];then
             reprompt
             continue
         fi
@@ -197,12 +196,12 @@ prompt_montages() {
             if [ "$number" -eq "$(( ${#montage_array[@]} + 1 ))" ];then
                 read -p "Enter a name for the new montage: " new_montage_name
                 valid=false
-                until $valid; do
+                until $valid;do
                     read -p "Enter Pair 1 (format: E1,E2): " pair1
                     validate_pair "$pair1" && valid=true
                 done
                 valid=false
-                until $valid; do
+                until $valid;do
                     read -p "Enter Pair 2 (format: E1,E2): " pair2
                     validate_pair "$pair2" && valid=true
                 done
@@ -212,7 +211,7 @@ prompt_montages() {
                 break  # Re-prompt the user with the updated montage list
             else
                 selected_montage=$(echo "$montages" | sed -n "${number}p")
-                if [ -n "$selected_montage" ];then
+                if [ -n "$selected_montage" ]; then
                     selected_montages+=("$selected_montage")
                 else
                     echo "Invalid montage number: $number. Please try again."
@@ -241,7 +240,7 @@ prompt_rois() {
         echo "$(( ${#roi_array[@]} + 1 )). Add a new ROI"
 
         read -p "Enter the numbers of the ROIs to analyze (comma-separated): " roi_choices
-        if [[ ! "$roi_choices" =~ ^[0-9,]+$ ]]; then
+        if [[ ! "$roi_choices" =~ ^[0-9,]+$ ]];then
             reprompt
             continue
         fi
@@ -251,7 +250,7 @@ prompt_rois() {
         new_roi_added=false
 
         for roi in "${selected_rois[@]}"; do
-            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ]; then
+            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ];then
                 read -p "Enter new ROI name: " new_roi_name
                 valid=false
                 until $valid; do
@@ -306,8 +305,9 @@ for subject_index in "${selected_subjects[@]}"; do
     ./"$main_script" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "$sim_mode" "${selected_montages[@]}"
 
     # The visualization is now handled within main-mTI.sh
-    # Call sphere-analysis.sh with the selected ROIs
-    ./sphere-analysis.sh "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
+    # Call sphere-creator.sh with the selected ROIs
+    echo "Calling sphere-creator.sh with ROIs: ${selected_roi_names[@]}"
+    ./sphere-creater.sh "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
 done
 
 # Output success message if new montages or ROIs were added
