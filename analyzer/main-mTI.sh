@@ -51,7 +51,7 @@ run_mti_simulation() {
     local selected_montages=("${@:6}")
     local mti_script_path="${script_dir}/mTI.py"
     echo "Running mTI simulation..."
-    #simnibs_python "$mti_script_path" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+    simnibs_python "$mti_script_path" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
     if [ $? -ne 0 ]; then
         echo "mTI simulation failed"
         exit 1

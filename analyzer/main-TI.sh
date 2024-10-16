@@ -50,7 +50,7 @@ echo "Debug: sim_mode: $sim_mode"
 echo "Debug: selected_montages: ${selected_montages[@]}"
 
 # Main script: Run TI.py with the selected parameters
-#simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
 
 # Function to visualize montages
 run_visualize_montages() {
@@ -143,7 +143,7 @@ run_visualize_montages
 transform_gm_to_nifti
 convert_t1_to_mni
 process_mesh_files
-run_sphere_analysis  # Add this step to create the spherical ROIs
+run_sphere_analysis  
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"

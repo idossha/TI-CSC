@@ -11,6 +11,14 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 project_dir="/mnt/$PROJECT_DIR_NAME"
 subject_dir="$project_dir/Subjects"
+simulation_dir="$project_dir/Simulations"
+utils_dir="$project_dir/utils"
+
+# Ensure utils_dir exists
+if [ ! -d "$utils_dir" ]; then
+    mkdir -p "$utils_dir"
+    echo "Created utils directory at $utils_dir."
+fi
 
 # Function to validate ROI input (format: X Y Z)
 validate_coordinates() {
@@ -31,10 +39,6 @@ validate_pair() {
     fi
     return 0
 }
-
-subject_dir="$project_dir/Subjects"
-simulation_dir="$project_dir/Simulations"
-utils_dir="$project_dir/utils"
 
 # Ensure montage_list.json exists
 montage_file="$utils_dir/montage_list.json"
@@ -161,6 +165,11 @@ choose_simulation_mode() {
     done
 }
 
+# **Modification 2: Ensure that necessary scripts have execution permissions**
+# Ensure that necessary scripts have execution permissions
+chmod +x "$main_script"
+chmod +x visualize-montage.sh
+
 # Function to prompt and select montages
 prompt_montages() {
     while true; do
@@ -281,6 +290,11 @@ prompt_rois() {
 choose_subjects
 choose_simulation_type
 choose_simulation_mode
+
+# **Ensure that necessary scripts have execution permissions**
+chmod +x ./*.sh
+
+
 prompt_montages
 prompt_rois
 
@@ -311,11 +325,11 @@ for subject_index in "${selected_subjects[@]}"; do
 done
 
 # Output success message if new montages or ROIs were added
-if $new_montage_added; then
+if [ "$new_montage_added" = true ]; then
     echo "New montage added to montage_list.json."
 fi
 
-if $new_roi_added; then
+if [ "$new_roi_added" = true ]; then
     echo "New ROI added to roi_list.json."
 fi
 
