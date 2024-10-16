@@ -1,9 +1,8 @@
-
 #!/bin/bash
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# October 14, 2024
+# October 16, 2024
 # Optimized for optimizer pipeline
 ##############################################
 
@@ -34,6 +33,14 @@ visualization_output_dir="$sim_dir/montage_imgs/"
 # Ensure directories exist
 mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
+# Debugging outputs
+echo "Debug: subject_id: $subject_id"
+echo "Debug: conductivity: $conductivity"
+echo "Debug: subject_dir: $subject_dir"
+echo "Debug: simulation_dir: $simulation_dir"
+echo "Debug: sim_mode: $sim_mode"
+echo "Debug: selected_montages: ${selected_montages[@]}"
+
 # Main script: Run mTI.py with the selected parameters
 run_mti_simulation() {
     local script_dir=$1
@@ -44,7 +51,7 @@ run_mti_simulation() {
     local selected_montages=("${@:6}")
     local mti_script_path="${script_dir}/mTI.py"
     echo "Running mTI simulation..."
-    simnibs_python "$mti_script_path" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+    #simnibs_python "$mti_script_path" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
     if [ $? -ne 0 ]; then
         echo "mTI simulation failed"
         exit 1
@@ -53,14 +60,19 @@ run_mti_simulation() {
 }
 
 
+
 # Function to visualize montages
 run_visualize_montages() {
     echo "Visualizing selected montages..."
+    echo "Calling visualize-montage.sh with arguments:"
+    echo "Montages: ${selected_montages[@]}"
+    echo "Sim Mode: $sim_mode"
+    echo "Output Directory: $visualization_output_dir"
     visualize_montage_script_path="$script_dir/visualize-montage.sh"
-    # Pass the selected montages, the montage type (sim_mode), and the output directory
     bash "$visualize_montage_script_path" "${selected_montages[@]}" "$sim_mode" "$visualization_output_dir"
     echo "Montage visualization completed"
 }
+
 
 # Function to extract GM mesh
 extract_gm_mesh() {

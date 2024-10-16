@@ -1,26 +1,24 @@
-
 import os
 import csv
 import sys
 import subprocess
 
-
 '''
 Ido Haber - ihaber@wisc.edu
-September 2, 2024
+October 16, 2024
 Optimized for optimizer pipeline
 
-This script manages the creation and modification of Regions of Interest (ROIs) for simulations. 
-It allows users to select existing ROIs or add new ones, with the option to visualize the 
-subject's T1-weighted MRI in Freeview before specifying ROI coordinates.
+This script manages the creation of Regions of Interest (ROIs) for simulations.
+It lists existing ROIs along with their coordinates and allows users to add new ones,
+with the option to visualize the subject's T1-weighted MRI in Freeview before specifying ROI coordinates.
 
 Key Features:
-- Lists existing ROIs and provides an option to modify or add new ones.
-- Invokes Freeview for visual reference when adding new ROIs.
+- Lists existing ROIs and displays their coordinates.
+- Option to add new ROIs.
+- Prompts the user to open Freeview for visual aid when adding new ROIs.
 - Saves ROI coordinates to a CSV file and maintains a list of all ROI files.
 - Handles file permissions and directory creation as needed.
 '''
-
 
 def save_roi_to_csv(roi_name, coordinates, directory):
     if not os.path.exists(directory):
@@ -50,7 +48,7 @@ def read_roi_coordinates(roi_name, directory):
     return []
 
 def call_view_nifti(roi_directory):
-    # Assuming the script is in the same directory, you may need to adjust this path
+    # Assuming the script is in the same directory; adjust this path if needed
     view_nifti_script = os.path.join(os.getcwd(), "view-nifti.sh")
 
     # Ensure the script has execute permissions
@@ -69,61 +67,52 @@ def main():
         sys.exit(1)
 
     roi_directory = sys.argv[1]
-    
-    # List to store the paths of generated CSV files
-    roi_files = []
-    
+
     # List existing ROIs
     existing_rois = list_existing_rois(roi_directory)
-    
+
     if existing_rois:
-        # Display existing ROIs and option to add a new one
-        print("Existing ROIs:")
+        # Display existing ROIs and their coordinates
+        print("Existing ROIs and their coordinates:")
         for idx, roi in enumerate(existing_rois, start=1):
-            print(f"{idx}. {roi}")
-        print(f"{len(existing_rois) + 1}. Add new ROI")
-        
-        while True:
-            choice = int(input(f"Select an ROI to modify (1-{len(existing_rois) + 1}): "))
-            if 1 <= choice <= len(existing_rois) + 1:
-                break
-            else:
-                print("Invalid choice. Please try again.")
-        
-        if choice == len(existing_rois) + 1:
-            # Call view-nifti.sh before adding a new ROI
-            call_view_nifti(roi_directory)
-            roi_name = input("Name of new ROI: ")
-            coordinates = []
-        else:
-            roi_name = existing_rois[choice - 1]
-            coordinates = read_roi_coordinates(roi_name, roi_directory)
-            print(f"Current coordinates for '{roi_name}': {coordinates}")
-        
-        if not coordinates:
-            coordinates = input(f"Enter RAS coordinates for ROI '{roi_name}' (x y z): ").split(',')
-            coordinates = [float(coord.strip()) for coord in coordinates]
-        
-    else:
-        # No existing ROIs, so call view-nifti.sh and then prompt to add a new one
+            coordinates = read_roi_coordinates(roi, roi_directory)
+            print(f"{idx}. {roi}: {coordinates}")
+        print(" ")
+
+    # Ask user if they want to add a new ROI
+    add_new_roi = input("Do you want to add a new ROI? (yes/no): ").strip().lower()
+    if add_new_roi not in ['yes', 'y']:
+        print("No new ROI added. Exiting.")
+        sys.exit(0)
+
+    # User chooses to add a new ROI
+    open_freeview = input("Do you want to open Freeview for visual reference? (yes/no): ").strip().lower()
+    if open_freeview in ['yes', 'y']:
         call_view_nifti(roi_directory)
-        roi_name = input("Name of new ROI: ")
-        coordinates = input(f"Enter RAS coordinates for ROI '{roi_name}' (x y z): ").split(',')
-        coordinates = [float(coord.strip()) for coord in coordinates]
-    
+    roi_name = input("Name of new ROI: ")
+
+    # Prompt user to enter coordinates
+    while True:
+        coords_input = input(f"Enter RAS coordinates for ROI '{roi_name}' (x y z): ")
+        coords_input = coords_input.replace(',', ' ').split()
+        if len(coords_input) != 3:
+            print("Please enter exactly three values for x, y, and z.")
+            continue
+        try:
+            coordinates = [float(coord.strip()) for coord in coords_input]
+            break
+        except ValueError:
+            print("Invalid input. Please enter numeric values for coordinates.")
+
     # Save the ROI to a CSV file
     roi_file = save_roi_to_csv(roi_name, coordinates, roi_directory)
-    roi_files.append(roi_file)
-    
-    # Write the list of ROI files to a text file
+
+    # Append the new ROI file to roi_list.txt
     roi_list_path = os.path.join(roi_directory, 'roi_list.txt')
-    with open(roi_list_path, 'w') as file:
-        for roi_file in roi_files:
-            file.write(f"{roi_file}\n")
-    
+    with open(roi_list_path, 'a') as file:
+        file.write(f"{roi_file}\n")
+
     print(f"ROI '{roi_name}' has been saved in the '{roi_directory}' directory.")
-    # End the script after processing the single ROI
-    return
 
 if __name__ == "__main__":
     main()

@@ -2,7 +2,7 @@
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# October 15, 2024
+# October 16, 2024
 # Optimized for optimizer pipeline
 #
 # This script orchestrates the full pipeline for Temporal Interference (TI) simulations
@@ -21,7 +21,8 @@ subject_id=$1
 conductivity=$2
 subject_dir=$3
 simulation_dir=$4
-shift 4
+sim_mode=$5  # Add this line to capture sim_mode
+shift 5
 selected_montages=("$@")
 
 # Set the script directory to the present working directory
@@ -40,16 +41,29 @@ visualization_output_dir="$sim_dir/montage_imgs/"
 # Ensure directories exist
 mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
+# Debugging outputs
+echo "Debug: subject_id: $subject_id"
+echo "Debug: conductivity: $conductivity"
+echo "Debug: subject_dir: $subject_dir"
+echo "Debug: simulation_dir: $simulation_dir"
+echo "Debug: sim_mode: $sim_mode"
+echo "Debug: selected_montages: ${selected_montages[@]}"
+
 # Main script: Run TI.py with the selected parameters
-simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
+#simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
 
 # Function to visualize montages
 run_visualize_montages() {
     echo "Visualizing selected montages..."
+    echo "Calling visualize-montage.sh with arguments:"
+    echo "Montages: ${selected_montages[@]}"
+    echo "Sim Mode: $sim_mode"
+    echo "Output Directory: $visualization_output_dir"
     visualize_montage_script_path="$script_dir/visualize-montage.sh"
     bash "$visualize_montage_script_path" "${selected_montages[@]}" "$sim_mode" "$visualization_output_dir"
     echo "Montage visualization completed"
 }
+
 
 # Function to extract GM mesh
 extract_gm_mesh() {
@@ -133,4 +147,3 @@ run_sphere_analysis  # Add this step to create the spherical ROIs
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"
-

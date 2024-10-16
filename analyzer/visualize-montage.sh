@@ -3,7 +3,7 @@
 ###########################################
 # Aksel W Jackson / awjackson2@wisc.edu
 # Ido Haber / ihaber@wisc.edu
-# October 15, 2024
+# October 16, 2024
 # optimized for TI-CSC analyzer
 # This script creates a png visualization of the electrode montage from user input
 ###########################################
@@ -34,10 +34,11 @@ else
     exit 1
 fi
 
-# Debugging: Output the montage type and selected montages
-echo "Montage type: $montage_type"
-echo "Selected montages: ${selected_montages[*]}"
-echo "Output directory: $output_directory"
+# Debugging: Output the simulation mode and montage type
+echo "Simulation Mode (sim_mode): $sim_mode"
+echo "Montage Type: $montage_type"
+echo "Selected Montages: ${selected_montages[@]}"
+echo "Output Directory: $output_directory"
 
 # Create output directory if it doesn't exist
 mkdir -p "$output_directory"
@@ -61,7 +62,8 @@ generate_output_filename() {
 # Function to overlay the ring for a pair of electrodes using pre-existing images
 overlay_rings() {
     local electrode_label=$1
-    local ring_image=$2  # Use the passed ring image
+    local ring_image=$2
+    echo "Overlaying ring for electrode: $electrode_label using image: $ring_image"
 
     # Get modified coordinates for the current electrode label from the CSV
     coords=$(awk -F, -v label="$electrode_label" '$1 == label {print $3, $5}' "/ti-csc/assets/amv/electrodes.csv")
@@ -72,6 +74,7 @@ overlay_rings() {
 
     # Read coordinates into variables
     IFS=' ' read -r x_adjusted y_adjusted <<< "$coords"
+    echo "Coordinates for electrode '$electrode_label': x=$x_adjusted, y=$y_adjusted"
 
     # Use the pre-existing ring image to overlay the ring at the specified coordinates
     convert "$output_image" "/ti-csc/assets/amv/$ring_image" -geometry +${x_adjusted}+${y_adjusted} -composite "$output_image" || {
@@ -85,11 +88,14 @@ global_pair_index=0
 # Loop through the selected montages and process each
 for montage in "${selected_montages[@]}"; do
     # Extract pairs from the JSON file based on the selected montage type
+    echo "Retrieving pairs for montage '$montage' of type '$montage_type' from '$montage_file'"
     pairs=$(jq -r ".${montage_type}[\"$montage\"][] | @csv" "$montage_file" 2>/dev/null)
     if [ $? -ne 0 ]; then
         echo "Error: Failed to parse JSON for montage '$montage'. Please check the format."
         continue
     fi
+    echo "Retrieved pairs for montage '$montage':"
+    echo "$pairs"
 
     # Generate the output image filename for the current montage (only for Unipolar)
     if [[ "$sim_mode" == "U" ]]; then
@@ -104,9 +110,11 @@ for montage in "${selected_montages[@]}"; do
     # Split the pairs and overlay the corresponding rings
     IFS=$'\n' # Set internal field separator to handle multiline input
     for pair in $pairs; do
+        echo "Processing pair: $pair"
         # Remove quotes and split by comma
         pair=${pair//\"/}  # Remove quotes
         IFS=',' read -r -a electrodes <<< "$pair"  # Split into individual electrodes
+        echo "Electrodes extracted: ${electrodes[@]}"
 
         # Check if we got exactly 2 electrodes
         if [ ${#electrodes[@]} -ne 2 ]; then
