@@ -7,10 +7,11 @@
 #
 # This script orchestrates the full pipeline for Temporal Interference (TI) simulations
 # using SimNIBS and other related tools. It handles directory setup, simulation execution,
-# mesh processing, GM extraction, NIfTI transformation, and other key tasks.
+# mesh processing, GM and WM extraction, NIfTI transformation, and other key tasks.
 #
 # New Feature:
 # - Automatically creates spherical ROIs and visualizes them based on the user’s input.
+# - Extracts both grey matter (GM) and white matter (WM) meshes and saves them in the same directory.
 #
 ##############################################
 
@@ -21,7 +22,7 @@ subject_id=$1
 conductivity=$2
 subject_dir=$3
 simulation_dir=$4
-sim_mode=$5  # Add this line to capture sim_mode
+sim_mode=$5  # Capture sim_mode
 shift 5
 selected_montages=("$@")
 
@@ -32,7 +33,7 @@ script_dir="$(pwd)"
 sim_dir="$simulation_dir/sim_${subject_id}"
 fem_dir="$sim_dir/FEM"
 whole_brain_mesh_dir="$sim_dir/Whole-Brain-mesh"
-gm_mesh_dir="$sim_dir/GM_mesh"
+gm_mesh_dir="$sim_dir/GM_mesh"  # We'll save both GM and WM meshes here
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
@@ -64,86 +65,88 @@ run_visualize_montages() {
     echo "Montage visualization completed"
 }
 
-
-# Function to extract GM mesh
-extract_gm_mesh() {
-  local input_file="$1"
-  local output_file="$2"
-  echo "Extracting GM from $input_file..."
-  gm_extract_script_path="$script_dir/gm_extract.py"
-  simnibs_python "$gm_extract_script_path" "$input_file" --output_file "$output_file"
-  echo "GM extraction completed"
+# Function to extract GM and WM meshes
+extract_gm_wm_meshes() {
+    local input_file="$1"
+    local gm_output_file="$2"
+    local wm_output_file="$3"
+    echo "Extracting GM and WM from $input_file..."
+    gm_extract_script_path="$script_dir/gm_extract.py"
+    simnibs_python "$gm_extract_script_path" "$input_file" --gm_output_file "$gm_output_file" --wm_output_file "$wm_output_file"
+    echo "GM and WM extraction completed"
 }
 
-# Function to transform GM mesh to NIfTI
-transform_gm_to_nifti() {
-  echo "Transforming GM mesh to NIfTI in MNI space..."
-  mesh2nii_script_path="$script_dir/mesh2nii_loop.sh"
-  bash "$mesh2nii_script_path" "$subject_id" "$subject_dir" "$simulation_dir"
-  echo "GM mesh to NIfTI transformation completed"
+# Function to transform GM and WM meshes to NIfTI
+transform_gm_wm_to_nifti() {
+    echo "Transforming GM and WM meshes to NIfTI in MNI space..."
+    mesh2nii_script_path="$script_dir/mesh2nii_loop.sh"
+    bash "$mesh2nii_script_path" "$subject_id" "$subject_dir" "$simulation_dir"
+    echo "GM and WM meshes to NIfTI transformation completed"
 }
 
 # Function to convert T1 to MNI space
 convert_t1_to_mni() {
-  local t1_file="$subject_dir/m2m_${subject_id}/T1.nii.gz"
-  local m2m_dir="$subject_dir/m2m_${subject_id}"
-  local output_file="$subject_dir/m2m_${subject_id}/T1_${subject_id}"
-  echo "Converting T1 to MNI space..."
-  subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
-  echo "T1 conversion to MNI completed: $output_file"
+    local t1_file="$subject_dir/m2m_${subject_id}/T1.nii.gz"
+    local m2m_dir="$subject_dir/m2m_${subject_id}"
+    local output_file="$subject_dir/m2m_${subject_id}/T1_${subject_id}"
+    echo "Converting T1 to MNI space..."
+    subject2mni -i "$t1_file" -m "$m2m_dir" -o "$output_file"
+    echo "T1 conversion to MNI completed: $output_file"
 }
 
 # Function to process mesh files
 process_mesh_files() {
-  echo "Processing mesh files..."
-  process_mesh_script_path="$script_dir/field-analysis/run_process_mesh_files.sh"
-  bash "$process_mesh_script_path" "$whole_brain_mesh_dir"
-  echo "Mesh files processed"
+    echo "Processing mesh files..."
+    process_mesh_script_path="$script_dir/field-analysis/run_process_mesh_files.sh"
+    bash "$process_mesh_script_path" "$whole_brain_mesh_dir"
+    echo "Mesh files processed"
 }
 
 # Function to run sphere analysis
 run_sphere_analysis() {
-  echo "Running sphere analysis..."
-  sphere_analysis_script_path="$script_dir/sphere-creater.sh"
-  bash "$sphere_analysis_script_path" "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
-  echo "Sphere analysis and spherical ROI creation completed"
+    echo "Running sphere analysis..."
+    sphere_analysis_script_path="$script_dir/sphere-creater.sh"
+    bash "$sphere_analysis_script_path" "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
+    echo "Sphere analysis and spherical ROI creation completed"
 }
 
 # Function to generate screenshots
 generate_screenshots() {
-  local input_dir="$1"
-  local output_dir="$2"
-  echo "Generating screenshots..."
-  screenshot_script_path="$script_dir/screenshot.sh"
-  bash "$screenshot_script_path" "$input_dir" "$output_dir"
-  echo "Screenshots generated"
+    local input_dir="$1"
+    local output_dir="$2"
+    echo "Generating screenshots..."
+    screenshot_script_path="$script_dir/screenshot.sh"
+    bash "$screenshot_script_path" "$input_dir" "$output_dir"
+    echo "Screenshots generated"
 }
 
 # Move and rename TI.msh files
 for ti_dir in "$fem_dir"/TI_*; do
-  if [ -d "$ti_dir" ]; then
-    ti_msh_file="$ti_dir/TI.msh"
-    if [ -e "$ti_msh_file" ]; then
-      montage_name=$(basename "$ti_dir")
-      new_name="${subject_id}_${montage_name}_TI.msh"
-      new_path="$whole_brain_mesh_dir/$new_name"
-      mv "$ti_msh_file" "$new_path"
-      echo "Moved $ti_msh_file to $new_path"
+    if [ -d "$ti_dir" ]; then
+        ti_msh_file="$ti_dir/TI.msh"
+        if [ -e "$ti_msh_file" ]; then
+            montage_name=$(basename "$ti_dir")
+            new_name="${subject_id}_${montage_name}_TI.msh"
+            new_path="$whole_brain_mesh_dir/$new_name"
+            mv "$ti_msh_file" "$new_path"
+            echo "Moved $ti_msh_file to $new_path"
+        fi
     fi
-  fi
 done
 
-# Extract GM from TI.msh
+# Extract GM and WM from TI.msh and save both in GM_mesh directory
 for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
-  output_file="$gm_mesh_dir/grey_$(basename "$mesh_file")"
-  extract_gm_mesh "$mesh_file" "$output_file"
+    gm_output_file="$gm_mesh_dir/grey_$(basename "$mesh_file")"
+    wm_output_file="$gm_mesh_dir/white_$(basename "$mesh_file")"  # Saving WM mesh in the same directory
+    extract_gm_wm_meshes "$mesh_file" "$gm_output_file" "$wm_output_file"
 done
 
 run_visualize_montages
-transform_gm_to_nifti
+transform_gm_wm_to_nifti
 convert_t1_to_mni
 process_mesh_files
 run_sphere_analysis  
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
 echo "All tasks completed successfully for subject ID: $subject_id"
+
