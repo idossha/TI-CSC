@@ -9,15 +9,24 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
+umask 0000  # Set umask to 0000 to ensure all created files and directories have permissions 777
+
 project_dir="/mnt/$PROJECT_DIR_NAME"
 subject_dir="$project_dir/Subjects"
 simulation_dir="$project_dir/Simulations"
 utils_dir="$project_dir/utils"
 
-# Ensure utils_dir exists
+# Ensure that necessary scripts have execution permissions
+# Use find to avoid errors if no .sh files are found
+find . -type f -name "*.sh" -exec chmod +x {} \;
+
+# Ensure utils_dir exists and set permissions
 if [ ! -d "$utils_dir" ]; then
     mkdir -p "$utils_dir"
-    echo "Created utils directory at $utils_dir."
+    chmod 777 "$utils_dir"
+    echo "Created utils directory at $utils_dir with permissions 777."
+else
+    chmod 777 "$utils_dir"
 fi
 
 # Function to validate ROI input (format: X Y Z)
@@ -40,7 +49,7 @@ validate_pair() {
     return 0
 }
 
-# Ensure montage_list.json exists
+# Ensure montage_list.json exists and set permissions
 montage_file="$utils_dir/montage_list.json"
 if [ ! -f "$montage_file" ]; then
     cat <<EOL > "$montage_file"
@@ -49,11 +58,14 @@ if [ ! -f "$montage_file" ]; then
   "multi_polar_montages": {}
 }
 EOL
-    echo "Created and initialized $montage_file."
+    chmod 777 "$montage_file"
+    echo "Created and initialized $montage_file with permissions 777."
     new_montage_added=true
+else
+    chmod 777 "$montage_file"
 fi
 
-# Ensure roi_list.json exists
+# Ensure roi_list.json exists and set permissions
 roi_file="$utils_dir/roi_list.json"
 if [ ! -f "$roi_file" ]; then
     cat <<EOL > "$roi_file"
@@ -61,8 +73,11 @@ if [ ! -f "$roi_file" ]; then
   "ROIs": {}
 }
 EOL
-    echo "Created and initialized $roi_file."
+    chmod 777 "$roi_file"
+    echo "Created and initialized $roi_file with permissions 777."
     new_roi_added=true
+else
+    chmod 777 "$roi_file"
 fi
 
 # List available subjects based on the project directory input
@@ -70,7 +85,7 @@ list_subjects() {
     subjects=()
     i=1
     for subject_path in "$subject_dir"/m2m_*; do
-        if [ -d "$subject_path" ];then
+        if [ -d "$subject_path" ]; then
             subject_id=$(basename "$subject_path" | sed 's/m2m_//')
             subjects+=("$subject_id")
             echo "$i. $subject_id"
@@ -93,7 +108,7 @@ choose_subjects() {
         if [[ "$subject_choices" =~ ^[0-9,]+$ ]]; then
             IFS=',' read -r -a selected_subjects <<< "$subject_choices"
             for num in "${selected_subjects[@]}"; do
-                if [[ $num -le 0 || $num -gt ${#subjects[@]} ]];then
+                if [[ $num -le 0 || $num -gt ${#subjects[@]} ]]; then
                     reprompt
                     continue 2  # Reprompt the user
                 fi
@@ -149,12 +164,12 @@ choose_anisotropic_type() {
 choose_simulation_mode() {
     while true; do
         read -p "Unipolar or Multipolar simulation? Enter U or M: " sim_mode
-        if [[ "$sim_mode" == "U" ]];then
+        if [[ "$sim_mode" == "U" ]]; then
             montage_type="uni_polar_montages"
             main_script="main-TI.sh"
             montage_type_text="Unipolar"
             break
-        elif [[ "$sim_mode" == "M" ]];then
+        elif [[ "$sim_mode" == "M" ]]; then
             montage_type="multi_polar_montages"
             main_script="main-mTI.sh"
             montage_type_text="Multipolar"
@@ -165,10 +180,7 @@ choose_simulation_mode() {
     done
 }
 
-# **Modification 2: Ensure that necessary scripts have execution permissions**
-# Ensure that necessary scripts have execution permissions
-chmod +x "$main_script"
-chmod +x visualize-montage.sh
+
 
 # Function to prompt and select montages
 prompt_montages() {
@@ -179,7 +191,7 @@ prompt_montages() {
         montage_array=($montages)
         half_count=$(( (${#montage_array[@]} + 1) / 2 ))
 
-        for (( i=0; i<half_count; i++ ));do
+        for (( i=0; i<half_count; i++ )); do
             left="${montage_array[$i]}"
             right="${montage_array[$((i + half_count))]}"
             printf "%2d. %-20s" $((i + 1)) "$left"
@@ -192,7 +204,7 @@ prompt_montages() {
         echo "$(( ${#montage_array[@]} + 1 )). Add a new montage?"
 
         read -p "Enter the numbers of the montages to simulate (comma-separated): " montage_choices
-        if [[ ! "$montage_choices" =~ ^[0-9,]+$ ]];then
+        if [[ ! "$montage_choices" =~ ^[0-9,]+$ ]]; then
             reprompt
             continue
         fi
@@ -202,20 +214,21 @@ prompt_montages() {
         new_montage_added=false
 
         for number in "${selected_numbers[@]}"; do
-            if [ "$number" -eq "$(( ${#montage_array[@]} + 1 ))" ];then
+            if [ "$number" -eq "$(( ${#montage_array[@]} + 1 ))" ]; then
                 read -p "Enter a name for the new montage: " new_montage_name
                 valid=false
-                until $valid;do
+                until $valid; do
                     read -p "Enter Pair 1 (format: E1,E2): " pair1
                     validate_pair "$pair1" && valid=true
                 done
                 valid=false
-                until $valid;do
+                until $valid; do
                     read -p "Enter Pair 2 (format: E1,E2): " pair2
                     validate_pair "$pair2" && valid=true
                 done
                 new_montage=$(jq -n --arg name "$new_montage_name" --argjson pairs "[[\"${pair1//,/\",\"}\"], [\"${pair2//,/\",\"}\"]]" '{($name): $pairs}')
                 jq ".${montage_type} += $new_montage" "$montage_file" > temp.json && mv temp.json "$montage_file"
+                chmod 777 "$montage_file"
                 new_montage_added=true
                 break  # Re-prompt the user with the updated montage list
             else
@@ -249,7 +262,7 @@ prompt_rois() {
         echo "$(( ${#roi_array[@]} + 1 )). Add a new ROI"
 
         read -p "Enter the numbers of the ROIs to analyze (comma-separated): " roi_choices
-        if [[ ! "$roi_choices" =~ ^[0-9,]+$ ]];then
+        if [[ ! "$roi_choices" =~ ^[0-9,]+$ ]]; then
             reprompt
             continue
         fi
@@ -259,7 +272,7 @@ prompt_rois() {
         new_roi_added=false
 
         for roi in "${selected_rois[@]}"; do
-            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ];then
+            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ]; then
                 read -p "Enter new ROI name: " new_roi_name
                 valid=false
                 until $valid; do
@@ -267,6 +280,7 @@ prompt_rois() {
                     validate_coordinates "$new_coordinates" && valid=true
                 done
                 jq ".ROIs[\"$new_roi_name\"]=\"$new_coordinates\"" "$roi_file" > temp.json && mv temp.json "$roi_file"
+                chmod 777 "$roi_file"
                 new_roi_added=true
                 break  # Re-prompt the user with the updated ROI list
             else
@@ -290,11 +304,6 @@ prompt_rois() {
 choose_subjects
 choose_simulation_type
 choose_simulation_mode
-
-# **Ensure that necessary scripts have execution permissions**
-chmod +x ./*.sh
-
-
 prompt_montages
 prompt_rois
 
@@ -318,7 +327,6 @@ for subject_index in "${selected_subjects[@]}"; do
     # Call the appropriate main pipeline script with the gathered parameters
     ./"$main_script" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "$sim_mode" "${selected_montages[@]}"
 
-    # The visualization is now handled within main-mTI.sh
     # Call sphere-creator.sh with the selected ROIs
     echo "Calling sphere-creator.sh with ROIs: ${selected_roi_names[@]}"
     ./sphere-creater.sh "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
