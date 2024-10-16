@@ -7,11 +7,11 @@
 #
 # This script orchestrates the full pipeline for Temporal Interference (TI) simulations
 # using SimNIBS and other related tools. It handles directory setup, simulation execution,
-# mesh processing, GM and WM extraction, NIfTI transformation, and other key tasks.
+# mesh processing, field extraction, NIfTI transformation, and other key tasks.
 #
-# New Feature:
+# New Features:
 # - Automatically creates spherical ROIs and visualizes them based on the user’s input.
-# - Extracts both grey matter (GM) and white matter (WM) meshes and saves them in the same directory.
+# - Extracts both grey matter (GM) and white matter (WM) meshes and saves them in the parcellated_mesh directory.
 #
 ##############################################
 
@@ -33,14 +33,14 @@ script_dir="$(pwd)"
 sim_dir="$simulation_dir/sim_${subject_id}"
 fem_dir="$sim_dir/FEM"
 whole_brain_mesh_dir="$sim_dir/Whole-Brain-mesh"
-gm_mesh_dir="$sim_dir/GM_mesh"  # We'll save both GM and WM meshes here
+parcellated_mesh_dir="$sim_dir/parcellated_mesh"  # Updated directory name
 nifti_dir="$sim_dir/niftis"
 output_dir="$sim_dir/ROI_analysis"
 screenshots_dir="$sim_dir/screenshots"
 visualization_output_dir="$sim_dir/montage_imgs/"
 
 # Ensure directories exist
-mkdir -p "$whole_brain_mesh_dir" "$gm_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
+mkdir -p "$whole_brain_mesh_dir" "$parcellated_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
 
 # Debugging outputs
 echo "Debug: subject_id: $subject_id"
@@ -65,23 +65,23 @@ run_visualize_montages() {
     echo "Montage visualization completed"
 }
 
-# Function to extract GM and WM meshes
-extract_gm_wm_meshes() {
+# Function to extract fields (GM and WM meshes)
+extract_fields() {
     local input_file="$1"
     local gm_output_file="$2"
     local wm_output_file="$3"
-    echo "Extracting GM and WM from $input_file..."
-    gm_extract_script_path="$script_dir/gm_extract.py"
-    simnibs_python "$gm_extract_script_path" "$input_file" --gm_output_file "$gm_output_file" --wm_output_file "$wm_output_file"
-    echo "GM and WM extraction completed"
+    echo "Extracting fields (GM and WM) from $input_file..."
+    field_extract_script_path="$script_dir/field_extract.py"
+    simnibs_python "$field_extract_script_path" "$input_file" --gm_output_file "$gm_output_file" --wm_output_file "$wm_output_file"
+    echo "Field extraction (GM and WM) completed"
 }
 
-# Function to transform GM and WM meshes to NIfTI
-transform_gm_wm_to_nifti() {
-    echo "Transforming GM and WM meshes to NIfTI in MNI space..."
+# Function to transform parcellated meshes to NIfTI
+transform_parcellated_meshes_to_nifti() {
+    echo "Transforming parcellated meshes (GM and WM) to NIfTI in MNI space..."
     mesh2nii_script_path="$script_dir/mesh2nii_loop.sh"
     bash "$mesh2nii_script_path" "$subject_id" "$subject_dir" "$simulation_dir"
-    echo "GM and WM meshes to NIfTI transformation completed"
+    echo "Parcellated meshes to NIfTI transformation completed"
 }
 
 # Function to convert T1 to MNI space
@@ -134,15 +134,15 @@ for ti_dir in "$fem_dir"/TI_*; do
     fi
 done
 
-# Extract GM and WM from TI.msh and save both in GM_mesh directory
+# Extract fields (GM and WM) from TI.msh and save both in parcellated_mesh directory
 for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
-    gm_output_file="$gm_mesh_dir/grey_$(basename "$mesh_file")"
-    wm_output_file="$gm_mesh_dir/white_$(basename "$mesh_file")"  # Saving WM mesh in the same directory
-    extract_gm_wm_meshes "$mesh_file" "$gm_output_file" "$wm_output_file"
+    gm_output_file="$parcellated_mesh_dir/grey_$(basename "$mesh_file")"
+    wm_output_file="$parcellated_mesh_dir/white_$(basename "$mesh_file")"  # Saving WM mesh in the same directory
+    extract_fields "$mesh_file" "$gm_output_file" "$wm_output_file"
 done
 
 run_visualize_montages
-transform_gm_wm_to_nifti
+transform_parcellated_meshes_to_nifti
 convert_t1_to_mni
 process_mesh_files
 run_sphere_analysis  

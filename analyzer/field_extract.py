@@ -1,4 +1,3 @@
-
 #!/Users/idohaber/Applications/SimNIBS-4.1/bin/simnibs_python
 # -*- coding: utf-8 -*-
 import argparse
@@ -11,7 +10,6 @@ from simnibs import mesh_io
 # Optimized for optimizer pipeline
 # - Extracts both grey matter (GM) and white matter (WM) meshes and saves them in the same directory.
 ##############################################
-
 
 def main(input_file, gm_output_file=None, wm_output_file=None):
     """
