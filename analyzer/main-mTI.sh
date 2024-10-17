@@ -22,7 +22,36 @@ subject_dir=$3
 simulation_dir=$4
 sim_mode=$5   # Capture the montage type (U or M) as the 5th argument
 shift 5
-selected_montages=("$@")  # All remaining arguments are montages
+
+# Initialize arrays
+selected_montages=()
+selected_roi_names=()
+
+# Parse montages until '--' is found
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --)
+            shift
+            break
+            ;;
+        *)
+            selected_montages+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Remaining arguments are ROI names
+selected_roi_names=("$@")
+
+# Debugging outputs
+echo "Debug: subject_id: $subject_id"
+echo "Debug: conductivity: $conductivity"
+echo "Debug: subject_dir: $subject_dir"
+echo "Debug: simulation_dir: $simulation_dir"
+echo "Debug: sim_mode: $sim_mode"
+echo "Debug: selected_montages: ${selected_montages[@]}"
+echo "Debug: selected_roi_names: ${selected_roi_names[@]}"
 
 # Set the script directory to the present working directory
 script_dir="$(pwd)"
@@ -39,14 +68,6 @@ visualization_output_dir="$sim_dir/montage_imgs/"
 
 # Ensure directories exist
 mkdir -p "$whole_brain_mesh_dir" "$parcellated_mesh_dir" "$nifti_dir" "$output_dir" "$screenshots_dir" "$visualization_output_dir"
-
-# Debugging outputs
-echo "Debug: subject_id: $subject_id"
-echo "Debug: conductivity: $conductivity"
-echo "Debug: subject_dir: $subject_dir"
-echo "Debug: simulation_dir: $simulation_dir"
-echo "Debug: sim_mode: $sim_mode"
-echo "Debug: selected_montages: ${selected_montages[@]}"
 
 # Function to run mTI simulation
 run_mti_simulation() {
@@ -126,13 +147,13 @@ process_mesh_files() {
 # Function to run sphere analysis
 run_sphere_analysis() {
     echo "Running sphere analysis..."
-    sphere_analysis_script_path="$script_dir/sphere-creater.sh"
+    sphere_analysis_script_path="$script_dir/sphere-analysis.sh"
     bash "$sphere_analysis_script_path" "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
     if [ $? -ne 0 ]; then
         echo "Sphere analysis failed"
         exit 1
     fi
-    echo "Sphere analysis and spherical ROI creation completed"
+    echo "Sphere analysis completed"
 }
 
 # Function to generate screenshots
@@ -162,13 +183,14 @@ for ti_msh_file in "$fem_dir"/*.msh; do
     fi
 done
 
-# Extract fields (GM and WM) from TI.msh and save both in parcellated_mesh directory
+# Extract fields (GM and WM) from .msh files and save both in parcellated_mesh directory
 for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
     gm_output_file="$parcellated_mesh_dir/grey_$(basename "$mesh_file")"
     wm_output_file="$parcellated_mesh_dir/white_$(basename "$mesh_file")"  # Saving WM mesh in the same directory
     extract_fields "$mesh_file" "$gm_output_file" "$wm_output_file"
 done
 
+# Run the processing steps
 run_visualize_montages
 transform_parcellated_meshes_to_nifti
 convert_t1_to_mni
@@ -176,5 +198,5 @@ process_mesh_files
 run_sphere_analysis
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
 
-echo "All tasks completed successfully for subject ID: $subject_id"
+
 

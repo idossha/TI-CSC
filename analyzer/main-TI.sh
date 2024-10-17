@@ -24,7 +24,27 @@ subject_dir=$3
 simulation_dir=$4
 sim_mode=$5  # Capture sim_mode
 shift 5
-selected_montages=("$@")
+
+# Initialize arrays
+selected_montages=()
+selected_roi_names=()
+
+# Parse montages until '--' is found
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --)
+            shift
+            break
+            ;;
+        *)
+            selected_montages+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Remaining arguments are ROI names
+selected_roi_names=("$@")
 
 # Set the script directory to the present working directory
 script_dir="$(pwd)"
@@ -49,6 +69,7 @@ echo "Debug: subject_dir: $subject_dir"
 echo "Debug: simulation_dir: $simulation_dir"
 echo "Debug: sim_mode: $sim_mode"
 echo "Debug: selected_montages: ${selected_montages[@]}"
+echo "Debug: selected_roi_names: ${selected_roi_names[@]}"
 
 # Main script: Run TI.py with the selected parameters
 simnibs_python TI.py "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "${selected_montages[@]}"
@@ -105,9 +126,9 @@ process_mesh_files() {
 # Function to run sphere analysis
 run_sphere_analysis() {
     echo "Running sphere analysis..."
-    sphere_analysis_script_path="$script_dir/sphere-creater.sh"
+    sphere_analysis_script_path="$script_dir/sphere-analysis.sh"
     bash "$sphere_analysis_script_path" "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
-    echo "Sphere analysis and spherical ROI creation completed"
+    echo "Sphere analysis completed"
 }
 
 # Function to generate screenshots
@@ -141,12 +162,11 @@ for mesh_file in "$whole_brain_mesh_dir"/*.msh; do
     extract_fields "$mesh_file" "$gm_output_file" "$wm_output_file"
 done
 
+# Run the processing steps
 run_visualize_montages
 transform_parcellated_meshes_to_nifti
 convert_t1_to_mni
 process_mesh_files
 run_sphere_analysis  
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
-
-echo "All tasks completed successfully for subject ID: $subject_id"
 

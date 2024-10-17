@@ -325,7 +325,7 @@ for subject_index in "${selected_subjects[@]}"; do
     subject_id="${subjects[$((subject_index-1))]}"
 
     # Call the appropriate main pipeline script with the gathered parameters
-    ./"$main_script" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "$sim_mode" "${selected_montages[@]}"
+    ./"$main_script" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "$sim_mode" "${selected_montages[@]}" -- "${selected_roi_names[@]}"
 
     # Call sphere-creator.sh with the selected ROIs
     echo "Calling sphere-creator.sh with ROIs: ${selected_roi_names[@]}"
@@ -341,3 +341,4 @@ if [ "$new_roi_added" = true ]; then
     echo "New ROI added to roi_list.json."
 fi
 
+echo "All tasks completed successfully for subject ID: $subject_id"

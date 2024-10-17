@@ -2,7 +2,7 @@
 
 ##############################################
 # Ido Haber - ihaber@wisc.edu
-# October 15, 2024
+# October 16, 2024
 # Optimized for TI-CSC toolbox
 #
 # This script dynamically creates spherical regions of interest (ROIs) based on the 
@@ -15,6 +15,12 @@ subject_id=$1
 simulation_dir=$2
 shift 2
 selected_roi_names=("$@")
+
+# Check if any ROI names are provided
+if [ ${#selected_roi_names[@]} -eq 0 ]; then
+    echo "Error: No ROI names provided."
+    exit 1
+fi
 
 # Set paths for subject-specific T1-weighted MNI file and output directory
 subject_dir="/mnt/$PROJECT_DIR_NAME/Subjects/"
@@ -30,9 +36,11 @@ fi
 # Ensure the output directory exists
 mkdir -p "$output_dir"
 
-# Initialize the combined ROI volume with zeros
-key=$(IFS=_; echo "${selected_roi_names[*]}")  # Combine selected ROIs with underscores to form a key
+# Replace spaces in ROI names with underscores and combine them to form a key
+key=$(IFS=_; echo "${selected_roi_names[*]// /_}")  
 combined_roi_file="${output_dir}/${key}-sphere.nii.gz"
+
+# Initialize the combined ROI volume with zeros
 fslmaths "$t1_file" -mul 0 "$combined_roi_file" -odt float
 
 # Set the radius for the spherical region (in voxels)
@@ -43,8 +51,8 @@ roi_file_path="/mnt/$PROJECT_DIR_NAME/utils/roi_list.json"
 
 # Function to get voxel coordinates from ROI name
 get_voxel_coordinates() {
-    local roi_name=$1
-    local roi_file=$2
+    local roi_name="$1"
+    local roi_file="$2"
     jq -r ".ROIs.\"$roi_name\"" "$roi_file"
 }
 
@@ -65,12 +73,15 @@ for roi_name in "${selected_roi_names[@]}"; do
 
     IFS=' ' read -r vx vy vz <<< "$location"
 
+    # Sanitize the ROI name to remove spaces and special characters
+    roi_name_sanitized=$(echo "$roi_name" | tr -s ' ' '_')
+
     # Create the spherical ROI based on the coordinates
-    roi_file="${output_dir}/sphere_${subject_id}_${roi_name}_$(echo $roi_name | tr -s ' ' '_').nii.gz"
+    roi_file="${output_dir}/sphere_${subject_id}_${roi_name_sanitized}.nii.gz"
 
     # Create the spherical ROI at the specified voxel coordinates
-    fslmaths "$t1_file" -mul 0 -add 1 -roi $vx 1 $vy 1 $vz 1 0 1 temp_point -odt float
-    fslmaths temp_point -kernel sphere $radius -dilM -bin "$roi_file" -odt float
+    fslmaths "$t1_file" -mul 0 -add 1 -roi "$vx" 1 "$vy" 1 "$vz" 1 0 1 temp_point.nii.gz -odt float
+    fslmaths temp_point.nii.gz -kernel sphere "$radius" -dilM -bin "$roi_file" -odt float
 
     # Add the spherical ROI to the combined volume
     fslmaths "$combined_roi_file" -add "$roi_file" "$combined_roi_file" -odt float
