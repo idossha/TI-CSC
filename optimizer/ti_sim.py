@@ -1,9 +1,8 @@
-
-
 #!/usr/bin/env python3
 
 import copy
 import os
+import re
 import numpy as np
 from itertools import product
 from simnibs import mesh_io
@@ -27,6 +26,15 @@ The script generates all possible electrode pair combinations, calculates the co
 and exports the results in mesh format for further visualization.
 '''
 
+# Define color variables
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+RESET = '\033[0m'
+RED = '\033[0;31m'     # Red for errors
+GREEN = '\033[0;32m'   # Green for success messages and prompts
+CYAN = '\033[0;36m'    # Cyan for actions being performed
+BOLD_CYAN = '\033[1;36m'
+
 # Function to generate all combinations
 def generate_combinations(E1_plus, E1_minus, E2_plus, E2_minus):
     combinations = []
@@ -37,33 +45,37 @@ def generate_combinations(E1_plus, E1_minus, E2_plus, E2_minus):
 
 # Function to get user input for electrode lists
 def get_electrode_list(prompt):
+    pattern = re.compile(r'^E\d{3}$')  # Match 'E' followed by exactly three digits
     while True:
-        user_input = input(prompt).strip()
-        if ',' in user_input:
-            electrodes = [e.strip() for e in user_input.split(',')]
-        else:
-            electrodes = user_input.split()
-        
-        if all(len(e) > 0 for e in electrodes):
+        user_input = input(f"{GREEN}{prompt}{RESET}").strip()
+        # Replace commas with spaces and split into a list
+        electrodes = user_input.replace(',', ' ').split()
+        # Validate electrodes
+        if all(pattern.match(e) for e in electrodes):
             return electrodes
         else:
-            print("Please enter valid electrode names separated by spaces or commas.")
+            print(f"{RED}Invalid input. Please enter electrodes in the format E###, e.g., E001, E100.{RESET}")
 
 # Get the intensity of stimulation from user input
 def get_intensity(prompt):
     while True:
         try:
-            intensity_mV = float(input(prompt).strip())
+            intensity_mV = float(input(f"{GREEN}{prompt}{RESET}").strip())
             return intensity_mV / 1000.0  # Convert mV to V
         except ValueError:
-            print("Please enter a valid number for the intensity of stimulation.")
+            print(f"{RED}Please enter a valid number for the intensity of stimulation.{RESET}")
 
 # Function to process lead field and generate the meshes
 def process_leadfield(leadfield_type, E1_plus, E1_minus, E2_plus, E2_minus, intensity, project_dir, subject_name):
+    print(f"{CYAN}Processing {leadfield_type} leadfield...{RESET}")
     # Load lead field
     leadfield_dir = os.path.join(project_dir, f"Subjects/leadfield_{leadfield_type}_{subject_name}")
     leadfield_hdf = os.path.join(leadfield_dir, f"{subject_name}_leadfield_{os.getenv('EEG_CAP', 'EGI_template')}.hdf5")
-    leadfield, mesh, idx_lf = TI.load_leadfield(leadfield_hdf)
+    try:
+        leadfield, mesh, idx_lf = TI.load_leadfield(leadfield_hdf)
+    except Exception as e:
+        print(f"{RED}Error loading leadfield: {e}{RESET}")
+        return
 
     # Set the output directory based on the project directory and subject name
     output_dir = os.path.join(project_dir, f"Simulations/opt_{subject_name}")
@@ -82,8 +94,12 @@ def process_leadfield(leadfield_type, E1_plus, E1_minus, E2_plus, E2_minus, inte
         TIpair2 = [e2p, e2m, intensity]
 
         # Get fields for the two pairs
-        ef1 = TI.get_field(TIpair1, leadfield, idx_lf)
-        ef2 = TI.get_field(TIpair2, leadfield, idx_lf)
+        try:
+            ef1 = TI.get_field(TIpair1, leadfield, idx_lf)
+            ef2 = TI.get_field(TIpair2, leadfield, idx_lf)
+        except Exception as e:
+            print(f"{RED}Error calculating fields for electrodes {e1p}, {e1m}, {e2p}, {e2m}: {e}{RESET}")
+            continue
 
         # Add to mesh for later visualization
         mout = copy.deepcopy(mesh)
@@ -116,18 +132,23 @@ def process_leadfield(leadfield_type, E1_plus, E1_minus, E2_plus, E2_minus, inte
         print(f"{progress_str} Saved {mesh_filename}")
 
 if __name__ == "__main__":
+    import sys
+
+    # Check for required environment variables
+    project_dir = os.getenv('PROJECT_DIR')
+    subject_name = os.getenv('SUBJECT_NAME')
+    if not project_dir or not subject_name:
+        print(f"{RED}Error: PROJECT_DIR and SUBJECT_NAME environment variables must be set.{RESET}")
+        sys.exit(1)
+
     # Get electrode lists from user input
-    E1_plus = get_electrode_list("Enter electrodes for E1_plus separated by spaces or commas: ")
-    E1_minus = get_electrode_list("Enter electrodes for E1_minus separated by spaces or commas: ")
-    E2_plus = get_electrode_list("Enter electrodes for E2_plus separated by spaces or commas: ")
-    E2_minus = get_electrode_list("Enter electrodes for E2_minus separated by spaces or commas: ")
+    E1_plus = get_electrode_list("Enter electrodes for E1_plus separated by spaces or commas (format E###): ")
+    E1_minus = get_electrode_list("Enter electrodes for E1_minus separated by spaces or commas (format E###): ")
+    E2_plus = get_electrode_list("Enter electrodes for E2_plus separated by spaces or commas (format E###): ")
+    E2_minus = get_electrode_list("Enter electrodes for E2_minus separated by spaces or commas (format E###): ")
 
     # Get intensity of stimulation
     intensity = get_intensity("Intensity of stimulation in mV: ")
-
-    # Get project directory and subject name from environment variables
-    project_dir = os.getenv('PROJECT_DIR')
-    subject_name = os.getenv('SUBJECT_NAME')
 
     # Process both gm and vol lead fields
     process_leadfield("gm", E1_plus, E1_minus, E2_plus, E2_minus, intensity, project_dir, subject_name)
