@@ -2,9 +2,9 @@
 
 ###########################################
 # Ido Haber / ihaber@wisc.edu
-# October 15, 2024
-# optimized for TI-CSC analyzer
-# This script is used to run a simulation pipeline for a given subject. 
+# October 31, 2024
+# Optimized for TI-CSC analyzer
+# This script is used to run a simulation pipeline for a given subject.
 ###########################################
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -16,15 +16,24 @@ subject_dir="$project_dir/Subjects"
 simulation_dir="$project_dir/Simulations"
 utils_dir="$project_dir/utils"
 
+# Define color variables
+BOLD='\033[1m'
+UNDERLINE='\033[4m'
+RESET='\033[0m'
+RED='\033[0;31m' #Red for errors or important exit messages.
+GREEN='\033[0;32m' #Green for successful completions.
+CYAN='\033[0;36m' #Cyan for actions being performed.
+BOLD_CYAN='\033[1;36m'
+YELLOW='\033[0;33m' #Yellow for warnings or important notices
+
 # Ensure that necessary scripts have execution permissions
-# Use find to avoid errors if no .sh files are found
 find . -type f -name "*.sh" -exec chmod +x {} \;
 
 # Ensure utils_dir exists and set permissions
 if [ ! -d "$utils_dir" ]; then
     mkdir -p "$utils_dir"
     chmod 777 "$utils_dir"
-    echo "Created utils directory at $utils_dir with permissions 777."
+    echo -e "${GREEN}Created utils directory at $utils_dir with permissions 777.${RESET}"
 else
     chmod 777 "$utils_dir"
 fi
@@ -33,7 +42,7 @@ fi
 validate_coordinates() {
     local coords=$1
     if [[ ! $coords =~ ^[0-9]+\ [0-9]+\ [0-9]+$ ]]; then
-        echo "Invalid format. Please enter in the format X Y Z (e.g., 50 60 70)."
+        echo -e "${RED}Invalid format. Please enter in the format X Y Z (e.g., 50 60 70).${RESET}"
         return 1
     fi
     return 0
@@ -43,7 +52,7 @@ validate_coordinates() {
 validate_pair() {
     local pair=$1
     if [[ ! $pair =~ ^E[0-9]+,E[0-9]+$ ]]; then
-        echo "Invalid format. Please enter in the format E1,E2 (e.g., E10,E11)."
+        echo -e "${RED}Invalid format. Please enter in the format E1,E2 (e.g., E10,E11).${RESET}"
         return 1
     fi
     return 0
@@ -59,7 +68,7 @@ if [ ! -f "$montage_file" ]; then
 }
 EOL
     chmod 777 "$montage_file"
-    echo "Created and initialized $montage_file with permissions 777."
+    echo -e "${GREEN}Created and initialized $montage_file with permissions 777.${RESET}"
     new_montage_added=true
 else
     chmod 777 "$montage_file"
@@ -74,34 +83,48 @@ if [ ! -f "$roi_file" ]; then
 }
 EOL
     chmod 777 "$roi_file"
-    echo "Created and initialized $roi_file with permissions 777."
+    echo -e "${GREEN}Created and initialized $roi_file with permissions 777.${RESET}"
     new_roi_added=true
 else
     chmod 777 "$roi_file"
 fi
 
+# Function to handle invalid input and reprompt
+reprompt() {
+    echo -e "${RED}Invalid input. Please try again.${RESET}"
+}
+
 # List available subjects based on the project directory input
 list_subjects() {
     subjects=()
-    i=1
     for subject_path in "$subject_dir"/m2m_*; do
         if [ -d "$subject_path" ]; then
             subject_id=$(basename "$subject_path" | sed 's/m2m_//')
             subjects+=("$subject_id")
-            echo "$i. $subject_id"
-            ((i++))
         fi
     done
-}
 
-# Function to handle invalid input and reprompt
-reprompt() {
-    echo "Invalid input. Please try again."
+    total_subjects=${#subjects[@]}
+    max_rows=10
+    num_columns=$(( (total_subjects + max_rows - 1) / max_rows ))
+
+    echo -e "${BOLD_CYAN}Available Subjects:${RESET}"
+    echo "-------------------"
+    for (( row=0; row<max_rows; row++ )); do
+        for (( col=0; col<num_columns; col++ )); do
+            index=$(( col * max_rows + row ))
+            if [ $index -lt $total_subjects ]; then
+                printf "%3d. %-25s" $(( index + 1 )) "${subjects[$index]}"
+            fi
+        done
+        echo
+    done
+    echo
 }
 
 # Prompt user to choose subjects, ensure valid numeric input
 choose_subjects() {
-    echo "Choose subjects by entering the corresponding numbers (comma-separated, e.g., 1,2):"
+    echo -e "${GREEN}Choose subjects by entering the corresponding numbers (comma-separated, e.g., 1,2):${RESET}"
     list_subjects
     while true; do
         read -p "Enter the numbers of the subjects to analyze: " subject_choices
@@ -122,7 +145,7 @@ choose_subjects() {
 
 # Prompt user for simulation type and ensure valid choice
 choose_simulation_type() {
-    echo "What type of simulation do you want to run?"
+    echo -e "${GREEN}What type of simulation do you want to run?${RESET}"
     echo "1. Isotropic"
     echo "2. Anisotropic"
     while true; do
@@ -144,7 +167,7 @@ choose_simulation_type() {
 choose_anisotropic_type() {
     anisotropic_selected=false
     while [ "$anisotropic_selected" = false ]; do
-        echo "Which anisotropic type?"
+        echo -e "${GREEN}Which anisotropic type?${RESET}"
         echo "1. vn"
         echo "2. dir"
         echo "3. mc"
@@ -163,7 +186,7 @@ choose_anisotropic_type() {
 # Prompt for simulation mode and ensure valid input
 choose_simulation_mode() {
     while true; do
-        read -p "Unipolar or Multipolar simulation? Enter U or M: " sim_mode
+        read -p "$(echo -e "${GREEN}Unipolar or Multipolar simulation? Enter U or M: ${RESET}")" sim_mode
         if [[ "$sim_mode" == "U" ]]; then
             montage_type="uni_polar_montages"
             main_script="main-TI.sh"
@@ -180,28 +203,25 @@ choose_simulation_mode() {
     done
 }
 
-
-
 # Function to prompt and select montages
 prompt_montages() {
     while true; do
-        montages=$(jq -r ".${montage_type} | keys[]" "$montage_file")
+        montage_data=$(jq -r ".${montage_type}" "$montage_file")
+        montage_names=($(echo "$montage_data" | jq -r 'keys[]'))
+        total_montages=${#montage_names[@]}
 
-        echo "Available montages:"
-        montage_array=($montages)
-        half_count=$(( (${#montage_array[@]} + 1) / 2 ))
+        echo -e "${BOLD_CYAN}Available Montages (${montage_type_text}):${RESET}"
+        echo "-----------------------------------------"
 
-        for (( i=0; i<half_count; i++ )); do
-            left="${montage_array[$i]}"
-            right="${montage_array[$((i + half_count))]}"
-            printf "%2d. %-20s" $((i + 1)) "$left"
-            if [ -n "$right" ]; then
-                printf "%2d. %s" $((i + 1 + half_count)) "$right"
-            fi
-            printf "\n"
+        for (( index=0; index<total_montages; index++ )); do
+            montage_name="${montage_names[$index]}"
+            pairs=$(echo "$montage_data" | jq -r --arg name "$montage_name" '.[$name][] | join(",")' | paste -sd '; ' -)
+            printf "%3d. %-25s Pairs: %s\n" $(( index + 1 )) "$montage_name" "$pairs"
         done
 
-        echo "$(( ${#montage_array[@]} + 1 )). Add a new montage?"
+        echo
+        echo -e "${GREEN}$(( total_montages + 1 )). Add a new montage?${RESET}"
+        echo
 
         read -p "Enter the numbers of the montages to simulate (comma-separated): " montage_choices
         if [[ ! "$montage_choices" =~ ^[0-9,]+$ ]]; then
@@ -214,7 +234,7 @@ prompt_montages() {
         new_montage_added=false
 
         for number in "${selected_numbers[@]}"; do
-            if [ "$number" -eq "$(( ${#montage_array[@]} + 1 ))" ]; then
+            if [ "$number" -eq "$(( total_montages + 1 ))" ]; then
                 read -p "Enter a name for the new montage: " new_montage_name
                 valid=false
                 until $valid; do
@@ -229,14 +249,14 @@ prompt_montages() {
                 new_montage=$(jq -n --arg name "$new_montage_name" --argjson pairs "[[\"${pair1//,/\",\"}\"], [\"${pair2//,/\",\"}\"]]" '{($name): $pairs}')
                 jq ".${montage_type} += $new_montage" "$montage_file" > temp.json && mv temp.json "$montage_file"
                 chmod 777 "$montage_file"
+                echo -e "${GREEN}New montage '$new_montage_name' added successfully.${RESET}"
                 new_montage_added=true
                 break  # Re-prompt the user with the updated montage list
             else
-                selected_montage=$(echo "$montages" | sed -n "${number}p")
-                if [ -n "$selected_montage" ]; then
-                    selected_montages+=("$selected_montage")
+                if (( number > 0 && number <= total_montages )); then
+                    selected_montages+=("${montage_names[$((number - 1))]}")
                 else
-                    echo "Invalid montage number: $number. Please try again."
+                    echo -e "${RED}Invalid montage number: $number. Please try again.${RESET}"
                     continue 2  # Reprompt montage selection
                 fi
             fi
@@ -251,15 +271,22 @@ prompt_montages() {
 # Function to prompt and select ROIs
 prompt_rois() {
     while true; do
-        rois=$(jq -r '.ROIs | keys[]' "$roi_file")
+        roi_data=$(jq -r '.ROIs' "$roi_file")
+        roi_names=($(echo "$roi_data" | jq -r 'keys[]'))
+        total_rois=${#roi_names[@]}
 
-        echo "Available ROIs:"
-        roi_array=($rois)
-        for (( i=0; i<${#roi_array[@]}; i++ )); do
-            echo "$((i+1)). ${roi_array[$i]}"
+        echo -e "${BOLD_CYAN}Available ROIs:${RESET}"
+        echo "---------------"
+
+        for (( index=0; index<total_rois; index++ )); do
+            roi_name="${roi_names[$index]}"
+            coordinates=$(echo "$roi_data" | jq -r --arg name "$roi_name" '.[$name]')
+            printf "%3d. %-20s Coordinates: %s\n" $(( index + 1 )) "$roi_name" "$coordinates"
         done
 
-        echo "$(( ${#roi_array[@]} + 1 )). Add a new ROI"
+        echo
+        echo -e "${GREEN}$(( total_rois + 1 )). Add a new ROI${RESET}"
+        echo
 
         read -p "Enter the numbers of the ROIs to analyze (comma-separated): " roi_choices
         if [[ ! "$roi_choices" =~ ^[0-9,]+$ ]]; then
@@ -272,7 +299,7 @@ prompt_rois() {
         new_roi_added=false
 
         for roi in "${selected_rois[@]}"; do
-            if [ "$roi" -eq "$(( ${#roi_array[@]} + 1 ))" ]; then
+            if [ "$roi" -eq "$(( total_rois + 1 ))" ]; then
                 read -p "Enter new ROI name: " new_roi_name
                 valid=false
                 until $valid; do
@@ -281,14 +308,14 @@ prompt_rois() {
                 done
                 jq ".ROIs[\"$new_roi_name\"]=\"$new_coordinates\"" "$roi_file" > temp.json && mv temp.json "$roi_file"
                 chmod 777 "$roi_file"
+                echo -e "${GREEN}New ROI '$new_roi_name' added successfully.${RESET}"
                 new_roi_added=true
                 break  # Re-prompt the user with the updated ROI list
             else
-                roi_name=$(echo "$rois" | sed -n "${roi}p")
-                if [ -n "$roi_name" ]; then
-                    selected_roi_names+=("$roi_name")
+                if (( roi > 0 && roi <= total_rois )); then
+                    selected_roi_names+=("${roi_names[$((roi - 1))]}")
                 else
-                    echo "Invalid ROI number: $roi. Please try again."
+                    echo -e "${RED}Invalid ROI number: $roi. Please try again.${RESET}"
                     continue 2  # Reprompt ROI selection
                 fi
             fi
@@ -300,25 +327,12 @@ prompt_rois() {
     done
 }
 
-# Prompt the user to select montages and ROIs
+# Main script execution
 choose_subjects
 choose_simulation_type
 choose_simulation_mode
 prompt_montages
 prompt_rois
-
-# Echo a summary of all selections
-echo " "
-echo "#####################################################"
-echo "Simulation Summary"
-echo " "
-echo "Subjects: ${subjects[*]}"
-echo "Type: $sim_type_text"
-echo "Montage type: $montage_type_text"
-echo "Montages: ${selected_montages[*]}"
-echo "ROIs: ${selected_roi_names[*]}"
-echo "#####################################################"
-echo " "
 
 # Loop through selected subjects and run the pipeline
 for subject_index in "${selected_subjects[@]}"; do
@@ -328,17 +342,18 @@ for subject_index in "${selected_subjects[@]}"; do
     ./"$main_script" "$subject_id" "$conductivity" "$subject_dir" "$simulation_dir" "$sim_mode" "${selected_montages[@]}" -- "${selected_roi_names[@]}"
 
     # Call sphere-creator.sh with the selected ROIs
-    echo "Calling sphere-creator.sh with ROIs: ${selected_roi_names[@]}"
+    echo -e "${GREEN}Calling sphere-creator.sh with ROIs: ${selected_roi_names[@]}${RESET}"
     ./sphere-creater.sh "$subject_id" "$simulation_dir" "${selected_roi_names[@]}"
 done
 
 # Output success message if new montages or ROIs were added
 if [ "$new_montage_added" = true ]; then
-    echo "New montage added to montage_list.json."
+    echo -e "${GREEN}New montage added to montage_list.json.${RESET}"
 fi
 
 if [ "$new_roi_added" = true ]; then
-    echo "New ROI added to roi_list.json."
+    echo -e "${GREEN}New ROI added to roi_list.json.${RESET}"
 fi
 
-echo "All tasks completed successfully for subject ID: $subject_id"
+echo -e "${GREEN}All tasks completed successfully.${RESET}"
+
