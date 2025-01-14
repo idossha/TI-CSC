@@ -69,7 +69,7 @@ def call_view_nifti(roi_directory):
     project_dir = os.path.dirname(os.path.dirname(roi_directory))
     
     # Construct the path to the T1-weighted MRI
-    t1_mri_path = os.path.join(project_dir, 'Subjects', f'm2m_{subject_name}', 'T1fs_conform.nii.gz')
+    t1_mri_path = os.path.join(project_dir, f'm2m_{subject_name}', 'T1.nii.gz')
     
     # Check if the MRI file exists
     if not os.path.exists(t1_mri_path):
