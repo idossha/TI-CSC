@@ -89,10 +89,9 @@ for subject_index in "${selected_subjects[@]}"; do
 
     # Define leadfield directories
     leadfield_vol_dir="$subject_dir/leadfield_vol_$subject_name"
-    leadfield_gm_dir="$subject_dir/leadfield_gm_$subject_name"
 
     # Check if both leadfield directories exist
-    if [ ! -d "$leadfield_vol_dir" ] || [ ! -d "$leadfield_gm_dir" ]; then
+    if [ ! -d "$leadfield_vol_dir" ] ; then
         echo -e "${YELLOW}Missing Leadfield matrices for subject $subject_name.${RESET}"
         while true; do
             echo -ne "${GREEN}Do you wish to create them? It will take some time (Y/N):${RESET} "
@@ -127,30 +126,6 @@ for subject_index in "${selected_subjects[@]}"; do
         echo -e "${GREEN}TI optimization completed successfully for subject $subject_name.${RESET}"
     else
         echo -e "${RED}TI optimization failed for subject $subject_name. Exiting.${RESET}"
-        exit 1
-    fi
-
-    # Call the sur2vol.py script to convert surface fields to volumetric NIfTI
-    echo -e "${CYAN}Running sur2vol.py for subject $subject_name...${RESET}"
-    python3 sur2vol.py
-
-    # Check if the sur2vol.py execution was successful
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Volumetric conversion completed successfully for subject $subject_name.${RESET}"
-    else
-        echo -e "${RED}Volumetric conversion failed for subject $subject_name. Exiting.${RESET}"
-        exit 1
-    fi
-
-    # Call the nii2msh_conversion.sh script for NIfTI to mesh conversion
-    echo -e "${CYAN}Running nii2msh_conversion.sh for subject $subject_name...${RESET}"
-    bash nii2msh_convert.sh "$project_dir" "$subject_name"
-
-    # Check if the nii2msh_conversion.sh execution was successful
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}NIfTI to mesh conversion completed successfully for subject $subject_name.${RESET}"
-    else
-        echo -e "${RED}NIfTI to mesh conversion failed for subject $subject_name. Exiting.${RESET}"
         exit 1
     fi
 

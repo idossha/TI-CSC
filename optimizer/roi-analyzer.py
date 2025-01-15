@@ -97,29 +97,6 @@ for i, msh_file in enumerate(msh_files):
         else:
             print(f"    TImax CSV file {ti_max_csv} not found. Skipping this file.")
 
-        # Process the from_volume CSV file
-        if os.path.exists(from_volume_csv):
-            print(f"Found from_volume CSV file: {from_volume_csv}")
-            try:
-                # Read the CSV file into a dataframe without headers
-                df_from_volume = pd.read_csv(from_volume_csv, header=None)
-                
-                # Ensure all data can be converted to float
-                df_from_volume = df_from_volume.apply(pd.to_numeric, errors='coerce')
-                df_from_volume = df_from_volume.dropna()  # Drop rows with non-numeric data
-                
-                # Extract values from the dataframe
-                from_volume_values = df_from_volume[0].tolist()  # Assuming the from_volume CSV has values in the first column
-                
-                # Store the values in the dictionary
-                if 'TInorm' not in mesh_data[mesh_key]:
-                    mesh_data[mesh_key]['TInorm'] = from_volume_values[0] if from_volume_values else None
-            except Exception as e:
-                print(f"Error processing from_volume file {from_volume_csv}: {e}")
-            finally:
-                os.remove(from_volume_csv)
-        else:
-            print(f"    from_volume CSV file {from_volume_csv} not found. Skipping this file.")
 
 # Save the dictionary to a file for later use
 json_output_path = os.path.join(opt_directory, 'mesh_data.json')
@@ -129,7 +106,7 @@ with open(json_output_path, 'w') as json_file:
 print(f"Dictionary saved to {json_output_path}")
 
 # Prepare the CSV data
-header = ['Mesh', 'TImax', 'TInorm']
+header = ['Mesh', 'TImax']
 csv_data = [header]
 
 for mesh_name, data in mesh_data.items():
@@ -141,9 +118,8 @@ for mesh_name, data in mesh_data.items():
         formatted_mesh_name = mesh_name  # Fallback to the original name if the pattern doesn't match
     
     ti_max_value = data.get('TImax', '')
-    ti_norm_value = data.get('TInorm', '')
     
-    row = [formatted_mesh_name, ti_max_value, ti_norm_value]
+    row = [formatted_mesh_name, ti_max_value]
     csv_data.append(row)
 
 # Write to CSV file

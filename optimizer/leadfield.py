@@ -16,10 +16,6 @@ which are based on two different leadfield configurations:
    - Used for calculating TI_max.
    - Creates a volumetric leadfield matrix that includes all tissues.
 
-2. Surface Leadfield:
-   - Used for calculating TI_localnorm.
-   - Creates a leadfield matrix specifically for the GM (gray matter) surface.
-
 The script exports all configurations based on the provided input EEG cap and subject directory.
 '''
 
@@ -79,15 +75,6 @@ create_leadfield(
     interpolation=None,  # No interpolation for volumetric data
     tissues=list(range(1, 16)),  # All tissues
     suffix='vol'
-)
-
-# Create the GM surface leadfield
-create_leadfield(
-    subject_ID=subject_path,
-    eeg_cap=eeg_cap,
-    interpolation='middle gm',  # Interpolation for the GM surface
-    tissues=None,  # No tissue list for surface data
-    suffix='gm'
 )
 
 print("Leadfield matrices have been successfully created.")
