@@ -42,7 +42,7 @@ def update_output_csv(project_dir, subject_name):
         sys.exit(1)
     
     # Extract the necessary columns and map FileName
-    summary_df['Mesh'] = summary_df['FileName'].apply(lambda x: re.sub(r"TI_max_norm_(.*?)\.msh", r"\1", x).replace("_and_", " <> "))
+    summary_df['Mesh'] = summary_df['FileName'].apply(lambda x: re.sub(r"TI_field_(.*?)\.msh", r"\1", x).replace("_and_", " <> "))
     extracted_df = summary_df[['Mesh'] + columns_to_extract]
     
     # Load the output CSV
