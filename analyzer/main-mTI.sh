@@ -45,17 +45,13 @@ done
 selected_roi_names=("$@")
 
 # Debugging outputs
-echo " "
-echo "##############################"
-echo "subject_id: $subject_id"
-echo "conductivity: $conductivity"
-echo "subject_dir: $subject_dir"
-echo "simulation_dir: $simulation_dir"
-echo "sim_mode: $sim_mode"
-echo "selected_montages: ${selected_montages[@]}"
-echo "selected_roi_names: ${selected_roi_names[@]}"
-echo "##############################"
-echo " "
+echo "Debug: subject_id: $subject_id"
+echo "Debug: conductivity: $conductivity"
+echo "Debug: subject_dir: $subject_dir"
+echo "Debug: simulation_dir: $simulation_dir"
+echo "Debug: sim_mode: $sim_mode"
+echo "Debug: selected_montages: ${selected_montages[@]}"
+echo "Debug: selected_roi_names: ${selected_roi_names[@]}"
 
 # Set the script directory to the present working directory
 script_dir="$(pwd)"
@@ -201,3 +197,6 @@ convert_t1_to_mni
 process_mesh_files
 run_sphere_analysis
 #generate_screenshots "$nifti_dir" "$screenshots_dir"
+
+
+
