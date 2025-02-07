@@ -15,7 +15,6 @@ TI-CSC/               <project_dir>/
 
 TI-CSC/
 │
-├── analyzer/
 │   ├── base-niftis/              # Base NIfTI files for ROI analysis
 │   ├── field-analysis/           # Scripts for analyzing fields within meshes
 │   │   ├── gm_extract.py         # Script to extract gray matter (GM) mesh from the whole-brain mesh
@@ -31,7 +30,7 @@ TI-CSC/
 │   │   └── TI.py                 # Python script for running TI simulations
 │
 ├── optimizer/
-│   ├── base-niftis/              # Base NIfTI files for optimization process
+│   ├── base-nftis/              # Base NIfTI files for optimization process
 │   ├── field-analysis/           # Scripts for mesh processing and analysis
 │   │   ├── electrode-selector.py # Script for selecting electrode configurations
 │   │   ├── leadfield.py          # Script for generating leadfields
